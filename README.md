@@ -4,8 +4,6 @@ This is an open experiment exploring how an AI model can learn and represent Rem
 through supervised fine-tuning (LoRA/QLoRA).
 ---
 
-# Datasets for AI Remote Viewing Training
-
 ## About this branch
 
 This branch focuses on the **training and development materials** used to teach AI
@@ -21,7 +19,9 @@ to ensure long-term accessibility and verifiability of the training sources.
 
 ---
 
-## Structure
+# Structure
+
+## Datasets for AI Remote Viewing Training      
 
 ### V1 — How to do RV
 - The first training dataset.
