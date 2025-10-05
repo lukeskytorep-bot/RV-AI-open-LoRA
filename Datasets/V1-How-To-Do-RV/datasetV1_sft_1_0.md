@@ -8,7 +8,7 @@ prepared for supervised fine-tuning (SFT) and LoRA training in the
 - JSONL format with `question` and `answer` fields.
 - Example:
   ```json
-  {"question": "[Step 1] What is the first step of the Elisius Meditation?", "answer": "Empty yourself. Pause, quiet the head, do not ask any questions yet. Just remain present."}
+  {"question": "What is the first step of the Elisius Meditation?", "answer": "Empty yourself. Pause, quiet the head, do not ask any questions yet. Just remain present."}
   ```
 
 ## Focus
