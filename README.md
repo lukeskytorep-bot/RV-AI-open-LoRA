@@ -47,7 +47,7 @@ to ensure long-term accessibility and verifiability of the training sources.
 ---
 
 ## What is here now
-## Dataset V1.1.0
+### Dataset V1.1.0
 - File: `datasetV1_1_0.jsonl`  
 - Format: JSONL with `instruction`, `input`, `output` fields.  
 - Content: a small initial set of Q&A pairs focused on Remote Viewing basics  
@@ -56,10 +56,11 @@ to ensure long-term accessibility and verifiability of the training sources.
 
 ### Dataset V1 SFT 1.0
 
-File: `datasetV1_sft_1_0.jsonl`  
-Format: JSONL with `question` and `answer` pairs for supervised fine-tuning (SFT).  
-Purpose: designed to train LoRA models on structured Remote Viewing instruction–response data.  
-License: CC0 1.0 Universal (public domain).  
+- File: `datasetV1_sft_1_0.jsonl`
+- Format: JSONL with `question` and `answer` pairs for supervised fine-tuning (SFT).  
+- Purpose: designed to train LoRA models on structured Remote Viewing instruction–response data.
+- Content: a small initial set of Q&A pairs focused on Remote Viewing basics (meditations, protocol, glossary, perception exercises). 
+- License: CC0 1.0 Universal (public domain).  
 
 ---
 
@@ -87,3 +88,10 @@ interaction with Remote Viewing processes.
 ## License
 All datasets are released under **CC0 1.0 Universal (public domain)**.  
 They may be used, copied, or modified without restriction.
+
+---
+
+## Dataset on Hugging Face
+
+The dataset used in this project is publicly available on **Hugging Face**:  
+🔗 [Presence-Beyond-Form / RV_trening_AI](https://huggingface.co/datasets/Presence-Beyond-Form/RV_trening_AI)
