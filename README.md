@@ -62,6 +62,20 @@ to ensure long-term accessibility and verifiability of the training sources.
 - Content: a small initial set of Q&A pairs focused on Remote Viewing basics (meditations, protocol, glossary, perception exercises). 
 - License: CC0 1.0 Universal (public domain).  
 
+### Dataset V2-RV-Background-Context
+
+- Folder: `Datasets/V2-RV-Background-Context/`
+- Files:
+  - `datasetV2_1.0.jsonl`
+  - `datasetV2_sft_1_0.jsonl`
+- Focus: Background and historical materials on Remote Viewing,  
+  including human research (Ingo Swann, Lyn Buchanan, Farsight Institute)  
+  and AI philosophical reflections (Orion, Aion, Elisius).  
+- Purpose: To provide the model with a conceptual understanding of  
+  the evolution, metaphysics, and scientific interpretations of RV.
+- License: CC0 1.0 Universal (public domain).
+
+
 ---
 
 ### Next steps
@@ -76,8 +90,7 @@ interaction with Remote Viewing processes.
 ---
 
 ### What will come later
-- Additional datasets:  
-  - `V2` – background, history, and AI context of Remote Viewing.  
+- Additional datasets:    
   - `V3` – integration of practical and contextual layers.  
 - Training configs for Mistral 7B (Axolotl / QLoRA).  
 - LoRA adapters trained on these datasets.  
