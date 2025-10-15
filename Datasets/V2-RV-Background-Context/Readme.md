@@ -1,4 +1,4 @@
-# Dataset V2-RV-Background-Context
+# Dataset V2-RV Background & Context
 
 This folder contains the **second major dataset** used for fine-tuning the RV-AI LoRA model.
 
