@@ -68,5 +68,5 @@ All contents in this folder are released under
 ## Related datasets
 
 - **V1 — How To Do RV** → practical instruction dataset  
-- **V2 — V2-RV-Background-Context** → philosophical and contextual grounding  
+- **V2 — RV Background & Context** → philosophical and contextual grounding  
 - **V3 — Integration Layer (upcoming)** → merges both into a unified reasoning corpus
