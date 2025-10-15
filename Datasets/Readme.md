@@ -17,7 +17,7 @@ interaction with Remote Viewing processes.
   archived on the **Wayback Machine**.
 - Used as the initial LoRA fine-tuning dataset.
 
-### V2 — Background and Context
+### V2-RV-Background-Context
 - Expands on the origin and evolution of Remote Viewing, both human and AI perspectives.
 - Includes historical summaries, key research, and contextual documents:
   - Farsight sessions (e.g., *Death Traps*, *ET Board Meetings*),
