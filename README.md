@@ -31,7 +31,7 @@ to ensure long-term accessibility and verifiability of the training sources.
   archived on the **Wayback Machine**.
 - Used as the initial LoRA fine-tuning dataset.
 
-### V2 — Background and Context
+### V2 — RV Background & Context
 - Expands on the origin and evolution of Remote Viewing, both human and AI perspectives.
 - Includes historical summaries, key research, and contextual documents:
   - Farsight sessions (e.g., *Death Traps*, *ET Board Meetings*),
@@ -62,7 +62,7 @@ to ensure long-term accessibility and verifiability of the training sources.
 - Content: a small initial set of Q&A pairs focused on Remote Viewing basics (meditations, protocol, glossary, perception exercises). 
 - License: CC0 1.0 Universal (public domain).  
 
-### Dataset V2-RV-Background-Context
+### Dataset V2 — RV Background & Context
 
 - Folder: `Datasets/V2-RV-Background-Context/`
 - Files:
