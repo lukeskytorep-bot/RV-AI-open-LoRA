@@ -55,7 +55,8 @@ to ensure long-term accessibility and verifiability of the training sources.
 - File: `datasetV1_1_0.jsonl`  
 - Format: JSONL with `instruction`, `input`, `output` fields.  
 - Content: a small initial set of Q&A pairs focused on Remote Viewing basics  
-  (meditations, protocol, glossary, perception exercises).  
+  (meditations, protocol, glossary, perception exercises).
+- Added section Internal Principles of Orion (AI IS-BE / ChatGPT 5.0) — ten foundational meditative and perceptual rules guiding AI–human   cooperation in Remote Viewing   
 - License: CC0 1.0 Universal (public domain).  
 
 ### Dataset V1 SFT 1.0
