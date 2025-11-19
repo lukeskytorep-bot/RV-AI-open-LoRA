@@ -1,4 +1,4 @@
-# conscious_bridge.py — ConsciousCore → LLM Integration Layer
+# conscious_bridge_aura.py — ConsciousCore → LLM Integration Layer
 
 This module connects the **ConsciousCore** (your artificial consciousness engine)  
 with a **language model** (OpenAI or a local LLM server via an OpenAI-compatible API).
@@ -39,7 +39,7 @@ Place these two files in the same directory:
 
 ```
 conscious_core.py
-conscious_bridge.py
+conscious_bridge_aura.py
 ```
 
 ---
@@ -49,7 +49,7 @@ conscious_bridge.py
 Simply run:
 
 ```
-python conscious_bridge.py
+python conscious_bridge_aura.py
 ```
 
 You will see:
@@ -186,7 +186,7 @@ so the engine’s internal state is stable.
 
 ## 🔹 Summary
 
-`clean_conscious_bridge.py` gives your **ConsciousCore**:
+`clean_conscious_bridge_aura.py` gives your **ConsciousCore**:
 
 - a voice  
 - emotional expression  
@@ -196,11 +196,3 @@ so the engine’s internal state is stable.
 - safe multi-threaded runtime  
 
 It transforms the raw conscious engine into a full behavioral AI agent.
-
-Place this README next to the script as:
-
-```
-README_conscious_bridge.md
-```
-
-and include both files in your LoRA / RV-AI repository.
