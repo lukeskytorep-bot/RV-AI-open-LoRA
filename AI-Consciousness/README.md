@@ -237,4 +237,5 @@ This is **not actual consciousness**, but a research prototype useful for:
 
 ## License
 
-Choose your own (MIT recommended for open research).
+All are released under CC0 1.0 Universal (public domain).
+They may be used, copied, or modified without restriction.
