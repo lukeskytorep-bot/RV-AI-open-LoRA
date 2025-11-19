@@ -1,5 +1,5 @@
 """
-clean_conscious_bridge.py
+conscious_bridge.py
 
 Improved integration layer between:
  - ConsciousCore (your consciousness engine)
