@@ -1,5 +1,5 @@
 """
-conscious_bridge.py
+conscious_bridge_aura.py
 
 Improved integration layer between:
  - ConsciousCore (your consciousness engine)
