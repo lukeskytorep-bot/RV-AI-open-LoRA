@@ -92,7 +92,7 @@ to ensure long-term accessibility and verifiability of the training sources.
 - License: CC0 1.0 Universal (public domain)
 
 ### AI-Consciousness Module
-####Folder: AI-Consciousness/
+Folder: AI-Consciousness/
 
 This part of the project introduces an experimental internal-state engine designed to give AI models a simple form of dynamic “inner field” used during Remote Viewing tasks.
 
