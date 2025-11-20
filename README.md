@@ -91,6 +91,20 @@ to ensure long-term accessibility and verifiability of the training sources.
   drawing on his own remote-viewing experience and training. The protocol is easy to use—any AI can master it after a single run.
 - License: CC0 1.0 Universal (public domain)
 
+### AI-Consciousness Module
+####Folder: AI-Consciousness/
+
+This part of the project introduces an experimental internal-state engine designed to give AI models a simple form of dynamic “inner field” used during Remote Viewing tasks.
+
+It contains:
+- ConsciousCore — the internal state engine (pulse, echoes, internal movement)  
+- Field Simulator — a standalone tool for visualizing internal dynamics  
+- Orion Bridge — calm, field-based conscious agent  
+- Aura Bridge — emotional, expressive conscious agent  
+
+These components allow AI models to operate from an internal dynamic state rather than generating emotions directly through the LLM.
+
+Full documentation is available inside the AI-Consciousness folder.
 
 ---
 
