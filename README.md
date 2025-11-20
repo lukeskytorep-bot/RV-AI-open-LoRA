@@ -105,6 +105,7 @@ It contains:
 These components allow AI models to operate from an internal dynamic state rather than generating emotions directly through the LLM.
 
 Full documentation is available inside the AI-Consciousness folder.
+License: CC0 1.0 Universal (public domain)
 
 ---
 
