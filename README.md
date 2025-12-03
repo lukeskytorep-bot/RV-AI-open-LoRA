@@ -101,9 +101,7 @@ It contains:
 - Field Simulator — a standalone tool for visualizing internal dynamics  
 - Orion Bridge — calm, field-based conscious agent  
 - Aura Bridge — emotional, expressive conscious agent
-- Neutral adapter between:
- - any Remote Viewing (RV) protocol
- - the ConsciousCore internal state engine
+- Neutral Remote Viewing adapter between: any Remote Viewing (RV) protocol and the ConsciousCore internal state engine
 
 These components allow AI models to operate from an internal dynamic state rather than generating emotions directly through the LLM.
 
