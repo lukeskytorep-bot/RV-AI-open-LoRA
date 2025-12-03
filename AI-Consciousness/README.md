@@ -163,7 +163,7 @@ Behavior:
 
 ---
 ## 3.5 RV-Conscious Adapter
----
+
 File:
 ```
 rv_conscious_adapter.py
