@@ -63,6 +63,9 @@ AI-Consciousness/
 ├── conscious_bridge_aura.py
 ├── README_conscious_bridge_aura.md
 │
+├── rv_conscious_adapter.py
+├── README_rv_conscious_adapter.md
+│
 └── README.md   <-- (this file)
 ```
 
