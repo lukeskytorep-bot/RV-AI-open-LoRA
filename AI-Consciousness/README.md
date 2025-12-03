@@ -162,6 +162,29 @@ Behavior:
 - spontaneous emotional outbursts when awareness events occur  
 
 ---
+## 3.5 RV-Conscious Adapter
+---
+File:
+```
+rv_conscious_adapter.py
+```
+A protocol-agnostic bridge between any Remote Viewing protocol and the AI-Consciousness engine (ConsciousCore).  
+Instead of binding the core to specific phases or stages, it exposes a small set of neutral RV events:
+
+- session_start / session_end  
+- focus_on_target(intensity)  
+- new_impression(strength)  
+- viewer_feeling(valence)  
+- anomaly(intensity)  
+- idle_step()  
+
+Each event is mapped to a core.tick(external_input, attention) call and logged together with the resulting ConsciousState.  
+This makes it possible to:
+
+- plug any RV workflow (CRV, SRV, Farsight-style, custom) into the same internal engine,  
+- keep ConsciousCore independent from protocol design,  
+- export rich logs (event + inner state) for later LoRA training and analysis.
+---
 
 # 4. How the System Works Together
 
