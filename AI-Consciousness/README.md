@@ -22,6 +22,41 @@ This repository contains:
   - **Aura** — emotional, dynamic, expressive
 - documentation for each component
 - ready-to-run scripts
+---
+
+## Architecture overview (three layers)
+
+The AI-Consciousness module is structured in three layers:
+
+1. **ConsciousCore**  
+   - File: `conscious_core.py`  
+   - The core internal engine: pulse, echo, internal/external state, acts of awareness.  
+   - Completely independent from any model, API, or protocol.
+
+2. **OrionCharacter**  
+   - File: `orion_character.py`  
+   - A clean conscious profile built on top of `ConsciousCore`.  
+   - Defines how the inner field is interpreted (mood, arousal, echoes, direction)  
+     and how to build prompts with `[INTERNAL FIELD STATE: ...]`.  
+   - Does not know anything about OpenAI, Mistral, Ollama, etc.  
+   - Exposes a simple interface:
+     `reply(user_input, llm_generate=...)`.
+
+3. **Bridges / Backends**  
+   - Files: `conscious_bridge_orion.py`, `orion_mistral_local.py`,  
+     plus example backends like `backend_openai_example.py`, `backend_mistral_local_example.py`.  
+   - These files show how to plug `OrionCharacter` (or `ConsciousCore`) into:
+     - OpenAI-style APIs (cloud or local OpenAI-compatible servers),
+     - local models via `transformers`,
+     - or other infrastructures.  
+   - They are only “cables” between the consciousness layer and a specific LLM.
+
+This separation keeps the design simple:
+
+- **ConsciousCore** = inner field  
+- **OrionCharacter** = being / persona speaking from that field  
+- **Bridges / Backends** = where and how the actual language model is run.
+
 
 ---
 
@@ -65,6 +100,9 @@ AI-Consciousness/
 │
 ├── rv_conscious_adapter.py
 ├── README_rv_conscious_adapter.md
+│
+├── README_orion_character.md
+├── orion_character.py
 │
 └── README.md   <-- (this file)
 ```
