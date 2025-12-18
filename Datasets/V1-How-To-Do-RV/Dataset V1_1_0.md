@@ -1,4 +1,4 @@
-# Dataset V1.1.0
+# Dataset V1_1_0
 
 This file (`datasetV1_1_0.jsonl`) contains the first small dataset prepared for
 training open-source AI models in **Remote Viewing (RV)** with LoRA/QLoRA.
