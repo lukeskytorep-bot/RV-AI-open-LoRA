@@ -25,7 +25,7 @@ It includes:
 
 | File | Description |
 |------|--------------|
-| `datasetV2_1.0.jsonl` | Full Q/A dataset (in English) — question/answer pairs designed for LoRA or base fine-tuning. |
+| `datasetV2_1_0.jsonl` | Full Q/A dataset (in English) — question/answer pairs designed for LoRA or base fine-tuning. |
 | `datasetV2_sft_1_0.jsonl` | Simplified SFT dataset (single-field “Question/Answer” format) for supervised fine-tuning (SFT). |
 | `Readme.md` | This file, describing dataset structure and contents. |
 
