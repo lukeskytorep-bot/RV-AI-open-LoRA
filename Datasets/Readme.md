@@ -25,7 +25,7 @@ interaction with Remote Viewing processes.
   - selected AI and Orion sessions summarized for reference.
 - Focused on giving the AI broader historical and conceptual grounding.
 
-### V3 — Integration Layer
+### V3 — Field and Tension Lexicon
  practical field perception examples — describing how individual elements appear in the field (for example: how a road, a moving boat, or a group of people feels as energetic tension).
 
 ---
