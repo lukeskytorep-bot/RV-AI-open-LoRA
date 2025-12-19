@@ -121,9 +121,7 @@ interaction with Remote Viewing processes.
 
 ---
 
-### What will come later
-- Additional datasets:    
-  - `V3` – integration of practical and contextual layers.  
+### What will come later 
 - Training configs for Mistral 7B (Axolotl / QLoRA).  
 - LoRA adapters trained on these datasets.  
 - Instructions for running demos (Replicate / Hugging Face).
