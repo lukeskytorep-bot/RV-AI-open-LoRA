@@ -26,9 +26,7 @@ interaction with Remote Viewing processes.
 - Focused on giving the AI broader historical and conceptual grounding.
 
 ### V3 — Integration Layer
-- Combines V1 (practical training) and V2 (contextual knowledge)
-  into unified datasets for deeper LoRA or full fine-tuning.
-- Designed for higher-level reasoning, synthesis, and cross-domain analysis.
+ practical field perception examples — describing how individual elements appear in the field (for example: how a road, a moving boat, or a group of people feels as energetic tension).
 
 ---
 
