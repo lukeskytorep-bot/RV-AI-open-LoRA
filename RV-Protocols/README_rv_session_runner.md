@@ -9,6 +9,42 @@ This folder contains `rv_session_runner.py` – a script that lets you run **ful
 
 The script is part of the **RV-AI-open-LoRA** project and is intended as a **training tool** for AI models (and humans) learning structured Remote Viewing.
 
+### Three-Brain Model for AI Remote Viewing
+
+Inside the RV training script the AI is treated as if it had **three separate “brains”**:
+
+1. **Thinking Brain (Lexicon – backend)**  
+   - Quiet, internal pattern recognition.  
+   - It answers questions like:  
+     - “Is this more like water or solid mass?”  
+     - “Is this biological or mechanical?”  
+     - “Is this static or moving?”  
+   - It never speaks directly to the human.  
+   - It only helps the AI decide what kind of field pattern it is touching.
+
+2. **Talking Brain (Structural Vocabulary – frontend)**  
+   - The only part allowed to speak in the session transcript.  
+   - Uses a small, controlled vocabulary:  
+     - ground, structures, people, movement, sounds, environment, activity...  
+   - No stories, no metaphors, no target names, no clever guesses.  
+   - This keeps the data clean and comparable between different sessions and models.
+
+3. **Rule Brain (Protocol – timing & discipline)**  
+   - Controls **when** the AI is allowed to do something.  
+   - Enforces the Resonant Contact Protocol (Phases 1–6, passes, Element 1, vectors, Attachment A, shadow zone).  
+   - Typical messages are:  
+     - “Not yet. Stay in Phase 1.”  
+     - “Now you can expand into Phase 2.”  
+     - “Now run Element 1 and vectors only on the strongest signal.”  
+   - Prevents skipping steps and collapsing the whole process into one big guess.
+
+**Short version:**
+
+- Think quietly (Lexicon),  
+- speak simply (Structural Vocabulary),  
+- follow the steps (Protocol).
+
+
 ---
 
 ## 1. What this script does
