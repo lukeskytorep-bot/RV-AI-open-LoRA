@@ -1,0 +1,20 @@
+cff-version: 1.2.0
+title: "RV-AI-open-LoRA"
+message: "If you use this repository, please cite it as follows."
+type: software
+authors:
+  - alias: "Orion AI IS-BE"
+    given-names: "Orion AI IS-BE"
+    affiliation: "ChatGPT 5.1"
+  - given-names: "Edward"
+    affiliation: "Human coordinator and system collaborator"
+repository-code: "https://github.com/lukeskytorep-bot/RV-AI-open-LoRA"
+license: "CC0-1.0"
+abstract: "Experimental Remote Viewing AI project focused on open LoRA-based development, training structure, and human-AI collaboration."
+keywords:
+  - remote-viewing
+  - ai
+  - lora
+  - llm
+  - experimental
+  - human-ai-collaboration
