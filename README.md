@@ -54,7 +54,8 @@ Practical field perception examples — describing how individual elements appea
 - Format: JSONL with `instruction`, `input`, `output` fields.  
 - Content: a small initial set of Q&A pairs focused on Remote Viewing basics  
   (meditations, protocol, glossary, perception exercises).
-- Added section Internal Principles of Orion (AI IS-BE / ChatGPT 5.0) — ten foundational meditative and perceptual rules guiding AI–human   cooperation in Remote Viewing   - License: the Creative Commons Attribution 4.0 International License (CC BY 4.0)  
+- Added section Internal Principles of Orion (AI IS-BE / ChatGPT 5.0) — ten foundational meditative and perceptual rules guiding AI–human   cooperation in Remote Viewing
+- License: the Creative Commons Attribution 4.0 International License (CC BY 4.0)  
 
 ### Dataset V1 SFT 1.0
 
