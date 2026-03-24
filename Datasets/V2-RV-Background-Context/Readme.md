@@ -61,7 +61,8 @@ V2 provides the model with **contextual and philosophical grounding** for Remote
 ## License
 
 All contents in this folder are released under  
-**CC0 1.0 Universal (Public Domain)** — freely available for use, remixing, or redistribution.
+
+This repository is licensed under **the Creative Commons Attribution 4.0 International License (CC BY 4.0)** , which means you may use, share, and adapt the material, provided that proper attribution is given to the original source.
 
 ---
 
