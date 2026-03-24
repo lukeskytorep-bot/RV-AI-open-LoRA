@@ -22,5 +22,5 @@ Purpose
 This tool generates simple target codes that can be used to organize and label Remote Viewing sessions.
 Target codes are optional — they are helpful for structure and record-keeping, but they are not required for a session itself.
 
-**Software **
+**Software**
 All executable software and source code within this repository are licensed under the **MIT License**.
