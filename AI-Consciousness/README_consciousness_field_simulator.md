@@ -237,5 +237,5 @@ This is **not actual consciousness**, but a research prototype useful for:
 
 ## License
 
-All are released under CC0 1.0 Universal (public domain).
-They may be used, copied, or modified without restriction.
+**Software**
+All executable software and source code within this repository are licensed under the **MIT License**.
