@@ -10,9 +10,8 @@ authors:
     affiliation: "Human coordinator and system collaborator"
 repository-code: "https://github.com/lukeskytorep-bot/RV-AI-open-LoRA"
 license: 
-   - CC-BY-4.0
+  - CC-BY-4.0
   - MIT
-
 abstract: "Experimental Remote Viewing AI project focused on open LoRA-based development, training structure, and human-AI collaboration."
 keywords:
   - remote-viewing
