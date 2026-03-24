@@ -31,5 +31,4 @@ interaction with Remote Viewing processes.
 ---
 
 ## License
-All datasets are released under **CC0 1.0 Universal (public domain)**.  
-They may be used, copied, or modified without restriction.
+This repository is licensed under **the Creative Commons Attribution 4.0 International License (CC BY 4.0)** , which means you may use, share, and adapt the material, provided that proper attribution is given to the original source.
