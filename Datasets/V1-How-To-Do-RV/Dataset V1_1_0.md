@@ -17,8 +17,8 @@ training open-source AI models in **Remote Viewing (RV)** with LoRA/QLoRA.
 - Covers: meditation steps, protocol basics, glossary, perception exercises.  
 
 ## License
-- CC0 1.0 Universal (public domain).  
-- Free to use, copy, modify, or extend without restrictions.  
+
+This repository is licensed under **the Creative Commons Attribution 4.0 International License (CC BY 4.0)** , which means you may use, share, and adapt the material, provided that proper attribution is given to the original source.  
 
 ## Next steps
 - A larger dataset  will be added later, with extended materials.
