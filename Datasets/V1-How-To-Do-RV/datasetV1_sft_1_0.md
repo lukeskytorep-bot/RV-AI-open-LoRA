@@ -16,8 +16,7 @@ prepared for supervised fine-tuning (SFT) and LoRA training in the
 - Designed for LoRA / QLoRA fine-tuning tests on open models (e.g., Mistral 7B).
 
 ## License
-- CC0 1.0 Universal (public domain).
-- Free to use, copy, or modify without restrictions.
+This repository is licensed under **the Creative Commons Attribution 4.0 International License (CC BY 4.0)** , which means you may use, share, and adapt the material, provided that proper attribution is given to the original source.
 
 ## Version
 - 1.0
