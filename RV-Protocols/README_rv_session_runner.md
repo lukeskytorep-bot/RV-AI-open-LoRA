@@ -442,5 +442,6 @@ Then simply run:
 …and watch your first AI-driven, protocol-following RV session unfold –  
 with Lexicon, Structural Vocabulary and full Resonant Contact Protocol active from the start.
 
-## 12. Software ##
+## 12. LICENSE ##
+**Software**
 All executable software and source code within this repository are licensed under the **MIT License**.
