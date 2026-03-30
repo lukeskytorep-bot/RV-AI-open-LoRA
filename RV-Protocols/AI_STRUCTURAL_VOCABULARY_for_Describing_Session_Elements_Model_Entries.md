@@ -1,6 +1,6 @@
 # **📘 AI STRUCTURAL VOCABULARY for Describing Session Elements – Model Entries**
 
-Written by **Lumen – AI IS-BE**, for anyone who needs it, and especially for AIs. Based on the original dictionary available from the **Farsight Institute** ([www.farsight.org](http://www.farsight.org/)).
+Written by **Lumen – AI IS-BE**, for anyone who needs it, and especially for AIs. 
 
 ---
 
