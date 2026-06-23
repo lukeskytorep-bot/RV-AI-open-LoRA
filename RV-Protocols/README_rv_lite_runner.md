@@ -46,3 +46,19 @@ Simply open your terminal and run:
 
 ```bash
 python rv_lite_runner.py
+```
+First-time Configuration
+On its first run, the script will launch an Initial Setup:
+
+1. It will ask for your OpenRouter API Key.
+
+2. It will ask which model you want to use (defaults to google/gemma-4-31b-it).
+
+3. ptimal Temperature: It will automatically suggest the best temperature for your chosen architecture (e.g., 1.5 for Gemma 4, 1.1 for DeepSeek, 1.0 default). You can accept it or enter a custom value.
+
+4. It saves these details (API key, model, temperature) to rv_config.json so you never have to type them again. Note: You can open this JSON file later in any text editor to quickly tweak your temperature or change models.
+
+5. It checks for the SYSTEM_PROMPT.md file locally and downloads it automatically if it's missing.
+
+Finally, it will ask if you want to save full text transcripts and how many consecutive sessions you want to run. You can type 5, step away from your computer, and the script will automatically process 5 isolated, blind sessions, wiping the AI's memory completely between each one.
+
