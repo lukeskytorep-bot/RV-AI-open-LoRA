@@ -235,10 +235,12 @@ Argument:
 
    Use this for debugging, controlled tests or cross-model comparisons on the same target.
 
-4.3. Loop Control
+### 4.3. Loop Control
+
 Argument:
 
-`count N`
+    --count N
+
 Number of consecutive sessions to run (default is 1). The script will automatically pick new targets and wipe the model's memory clean between sessions, ensuring complete data isolation.
 
 ---
