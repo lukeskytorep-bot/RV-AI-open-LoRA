@@ -18,7 +18,8 @@ Unlike the full `rv_session_runner.py` (which uses a complex three-brain setup w
    - This loop repeats until the AI says `STOP` (or hits a hard limit of 3 loops to save your API budget).
 5. **Phase 3 (Deep Exploration):** The AI orbits the target, performs a virtual walkaround, and investigates the main activity and surroundings.
 6. **Phase 4 (Final Synthesis):** The AI asks 3 probing questions and generates a final ASCII drawing of the target based on its raw data.
-7. **Phase 5 (Feedback & Evaluation):** The script finally reveals the true target text. The AI objectively evaluates its own performance (perfect matches, partial matches, and noise).
+7. **Clean Reveal:** The script explicitly displays the actual target text on your screen.
+8. **Phase 5 (Feedback & Evaluation):** The AI objectively evaluates its own performance against the revealed target (perfect matches, partial matches, and noise).
 
 ---
 
@@ -26,39 +27,29 @@ Unlike the full `rv_session_runner.py` (which uses a complex three-brain setup w
 
 Create a folder named `RV-Targets/` in the same directory as the script. Place your targets as `.md` or `.txt` files inside (one file = one target). 
 
-When you run the script, it asks for a **Profile Name** and your preferred mode:
-- **[C] Continue:** The script checks `rv_lite_sessions_log.jsonl` and guarantees it will *not* feed you a target this Profile has already completed.
-- **[F] Fresh:** The script ignores history and randomly picks any target from the folder.
+The script uses a log file (`rv_lite_sessions_log.jsonl`) to track your progress. It guarantees that **the active profile will never see the same target twice**. If you want to start fresh and replay targets, simply create a New Profile in the Main Menu.
 
 *(If you don't have targets, the script will provide a GitHub link to download a starter pack of 20 targets).*
 
 ---
 
-## 3. Setup and Execution
+## 3. Logs & Transcripts
+
+The script generates two types of records:
+1. **`rv_lite_sessions_log.jsonl`:** A lightweight metadata tracker that remembers which targets a profile has already completed.
+2. **`RV-Transcripts/` Folder:** If you opt-in, the script will generate a full `.txt` file for every session containing the entire conversation, steps, and ASCII drawings.
+
+---
+
+## 4. Setup and Execution
 
 ### Requirements
 - Python 3.8+
 - `pip install openai requests`
 - An **OpenRouter API Key**
 
-### Running the script
-Simply open your terminal and run:
+### First-time Configuration
+You do **not** need to set up environment variables or edit the code. Simply open your terminal and run:
 
 ```bash
 python rv_lite_runner.py
-```
-First-time Configuration
-On its first run, the script will launch an Initial Setup:
-
-1. It will ask for your OpenRouter API Key.
-
-2. It will ask which model you want to use (defaults to google/gemma-4-31b-it).
-
-3. ptimal Temperature: It will automatically suggest the best temperature for your chosen architecture (e.g., 1.5 for Gemma 4, 1.1 for DeepSeek, 1.0 default). You can accept it or enter a custom value.
-
-4. It saves these details (API key, model, temperature) to rv_config.json so you never have to type them again. Note: You can open this JSON file later in any text editor to quickly tweak your temperature or change models.
-
-5. It checks for the SYSTEM_PROMPT.md file locally and downloads it automatically if it's missing.
-
-Finally, it will ask if you want to save full text transcripts and how many consecutive sessions you want to run. You can type 5, step away from your computer, and the script will automatically process 5 isolated, blind sessions, wiping the AI's memory completely between each one.
-
