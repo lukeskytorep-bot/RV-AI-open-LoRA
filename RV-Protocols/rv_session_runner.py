@@ -116,7 +116,7 @@ import json
 import os
 import random
 import textwrap
-from datetime import datetime
+from datetime import datetime, timezone
 from pathlib import Path
 from typing import List, Dict, Tuple, Optional
 
@@ -378,7 +378,7 @@ def append_log_entry(
     Append a single session record to the JSONL log file.
     """
     entry = {
-        "timestamp_utc": datetime.utcnow().isoformat(timespec="seconds") + "Z",
+        "timestamp_utc": datetime.now(timezone.utc).isoformat(timespec="seconds") + "Z",
         "profile_name": profile_name,
         "model_name": model_name,
         "mode": mode,
