@@ -7,13 +7,13 @@ featuring a dynamic, loop-based exploration protocol.
 
 Credits
 -------
-Co-created by human researcher Edward and AI assistant Aura Gemini 3.1 Pro.
+Co-created by human researcher Edward and AI assistant Aura  Gemini 3.1 Pro.
 
 What this script does
 ---------------------
-1. Initial Setup: Interactively prompts for your OpenRouter API key and preferred model, saving them to rv_config.json for future use.
+1. Initial Setup: Interactively prompts for your OpenRouter API key and preferred model. It automatically suggests optimal temperatures (e.g., 1.5 for Gemma 4, 1.1 for DeepSeek, 1.0 default) and saves settings to rv_config.json.
 2. Core System Prompt: Checks for and downloads SYSTEM_PROMPT.md from GitHub if missing. This acts as the main behavioral anchor for the AI.
-3. Target Management: Checks the RV-Targets/ folder. Depending on your choice (Continue or Fresh), it tracks which targets have already been completed by your specific Profile Name to avoid accidental repetitions.
+3. Target Management: Checks the RV-Targets/ folder. Tracks which targets have already been completed by your specific Profile Name to avoid accidental repetitions.
 4. Blind Protocol Execution:
    - Generates a random 8-digit blind Target ID.
    - Initial Touches: Asks the AI for 6 quick structural touches and 3 angles.
@@ -21,7 +21,7 @@ What this script does
    - Deep Exploration: Commands virtual orbiting, walkarounds, and environmental/activity scans.
    - Synthesizing: Requests ASCII drawings and 3 probing questions.
 5. Feedback Phase: Only after the session is complete does the script reveal the actual target file's content to the AI for objective evaluation.
-6. Logging & Transcripts: Records session outcomes in rv_lite_sessions_log.jsonl. Interactively asks if you want to save the full text transcript of the session to the RV-Transcripts/ folder.
+6. Logging & Transcripts: Records session outcomes in rv_lite_sessions_log.jsonl and optionally saves full text transcripts to the RV-Transcripts/ folder.
 """
 
 import os
@@ -54,12 +54,33 @@ MAX_FIELD_LOOPS = 3
 # SETUP & I/O HELPERS
 # ─────────────────────────────────────────
 
+def get_optimal_temperature(model_name: str) -> float:
+    """Returns the optimal temperature based on the selected model architecture."""
+    model_lower = model_name.lower()
+    if "gemma-4" in model_lower:
+        return 1.5
+    elif "deepseek" in model_lower:
+        return 1.1
+    return 1.0
+
 def setup_config() -> Dict:
     """Load config file or ask user for setup if it doesn't exist."""
-    if Path(CONFIG_FILE).exists():
-        with open(CONFIG_FILE, "r") as f:
-            return json.load(f)
+    config_path = Path(CONFIG_FILE)
     
+    # If config already exists, load it and ensure TEMPERATURE is present
+    if config_path.exists():
+        with open(config_path, "r") as f:
+            config = json.load(f)
+        
+        # Retrofit older config files that lack the TEMPERATURE setting
+        if "TEMPERATURE" not in config:
+            optimal_temp = get_optimal_temperature(config.get("MODEL_NAME", ""))
+            config["TEMPERATURE"] = optimal_temp
+            with open(config_path, "w") as f:
+                json.dump(config, f, indent=4)
+        return config
+    
+    # First-time setup
     print("\n" + "="*50)
     print(" INITIAL SETUP: RV LITE RUNNER")
     print("="*50)
@@ -70,15 +91,27 @@ def setup_config() -> Dict:
     model_input = input(f"Enter model ID to use (Press Enter for '{default_model}'): ").strip()
     model_name = model_input if model_input else default_model
 
+    # Dynamic temperature handling
+    optimal_temp = get_optimal_temperature(model_name)
+    print(f"\n[INFO] For the model '{model_name}', the recommended temperature is {optimal_temp}.")
+    temp_input = input(f"Enter a custom temperature or press Enter to keep {optimal_temp}: ").strip()
+    
+    try:
+        final_temp = float(temp_input) if temp_input else optimal_temp
+    except ValueError:
+        print(f"[WARNING] Invalid input. Defaulting to recommended temperature: {optimal_temp}.")
+        final_temp = optimal_temp
+
     config = {
         "OPENROUTER_API_KEY": api_key,
-        "MODEL_NAME": model_name
+        "MODEL_NAME": model_name,
+        "TEMPERATURE": final_temp
     }
     
     with open(CONFIG_FILE, "w") as f:
         json.dump(config, f, indent=4)
         
-    print(f"[INFO] Configuration saved to {CONFIG_FILE}.")
+    print(f"[INFO] Configuration saved to {CONFIG_FILE}. You can edit this file later to change settings.")
     return config
 
 def ensure_system_prompt() -> Optional[str]:
@@ -153,7 +186,7 @@ def get_available_targets(session_count: int, profile_name: str, fresh_start: bo
 def generate_target_id() -> str:
     return "".join(str(random.randint(0, 9)) for _ in range(8))
 
-def call_llm(client: OpenAI, model: str, messages: List[Dict], temperature: float = 1.0) -> str:
+def call_llm(client: OpenAI, model: str, messages: List[Dict], temperature: float) -> str:
     try:
         completion = client.chat.completions.create(
             model=model,
@@ -191,16 +224,18 @@ def log_session(profile: str, model: str, target_id: str, target_file: str):
 def run_lite_session(client: OpenAI, config: Dict, system_prompt_text: str, target_path: Path, profile_name: str, save_transcripts: bool):
     target_id = generate_target_id()
     model = config["MODEL_NAME"]
+    temp = config.get("TEMPERATURE", 1.0)
     
     target_description = target_path.read_text(encoding="utf-8", errors="ignore").strip()
     
-    print(f"[INFO] Starting session for Target ID: {target_id} (Hidden file: {target_path.name})")
+    print(f"[INFO] Starting session for Target ID: {target_id} (Hidden file: {target_path.name}) | Temp: {temp}")
 
     # Initialize transcript content
     transcript_content = f"=== RV LITE SESSION TRANSCRIPT ===\n"
     transcript_content += f"Target ID: {target_id}\n"
     transcript_content += f"Profile: {profile_name}\n"
     transcript_content += f"Model: {model}\n"
+    transcript_content += f"Temperature: {temp}\n"
     transcript_content += f"Date (UTC): {datetime.now(timezone.utc).isoformat(timespec='seconds')}Z\n"
     transcript_content += "="*80 + "\n\n"
 
@@ -223,7 +258,7 @@ def run_lite_session(client: OpenAI, config: Dict, system_prompt_text: str, targ
         "Rules: Do NOT guess or name the target. Provide raw data only. Report any strange or anomalous data."
     )
     messages.append({"role": "user", "content": step1_prompt})
-    reply = call_llm(client, model, messages)
+    reply = call_llm(client, model, messages, temp)
     messages.append({"role": "assistant", "content": reply})
     print_step("Initial Touches & Angles", reply)
     record_to_transcript("Initial Touches & Angles", reply)
@@ -237,7 +272,7 @@ def run_lite_session(client: OpenAI, config: Dict, system_prompt_text: str, targ
             "If NO: output exactly 'STOP' on the first line, and briefly summarize what you have so far."
         )
         messages.append({"role": "user", "content": loop_prompt})
-        reply = call_llm(client, model, messages)
+        reply = call_llm(client, model, messages, temp)
         messages.append({"role": "assistant", "content": reply})
         
         if reply.strip().upper().startswith("STOP"):
@@ -255,7 +290,7 @@ def run_lite_session(client: OpenAI, config: Dict, system_prompt_text: str, targ
     # STEP 3: ASCII Drawings
     step3_prompt = "Generate ASCII drawings representing the target based on the raw data you've gathered so far. Focus on main shapes, proportions, and spatial relationships."
     messages.append({"role": "user", "content": step3_prompt})
-    reply = call_llm(client, model, messages)
+    reply = call_llm(client, model, messages, temp)
     messages.append({"role": "assistant", "content": reply})
     print_step("Initial ASCII Drawings", reply)
     record_to_transcript("Initial ASCII Drawings", reply)
@@ -270,7 +305,7 @@ def run_lite_session(client: OpenAI, config: Dict, system_prompt_text: str, targ
         "Keep providing raw structural/sensory data without naming the target."
     )
     messages.append({"role": "user", "content": step4_prompt})
-    reply = call_llm(client, model, messages)
+    reply = call_llm(client, model, messages, temp)
     messages.append({"role": "assistant", "content": reply})
     print_step("Deep Exploration (Orbit, Activity, Surroundings)", reply)
     record_to_transcript("Deep Exploration (Orbit, Activity, Surroundings)", reply)
@@ -282,7 +317,7 @@ def run_lite_session(client: OpenAI, config: Dict, system_prompt_text: str, targ
         "- Create one final, detailed ASCII drawing synthesizing the core concept of the target."
     )
     messages.append({"role": "user", "content": step5_prompt})
-    reply = call_llm(client, model, messages)
+    reply = call_llm(client, model, messages, temp)
     messages.append({"role": "assistant", "content": reply})
     print_step("Probing Questions & Final ASCII", reply)
     record_to_transcript("Probing Questions & Final ASCII", reply)
@@ -299,7 +334,7 @@ def run_lite_session(client: OpenAI, config: Dict, system_prompt_text: str, targ
         "Do not retroactively change your session data, just analyze it objectively against this feedback."
     )
     messages.append({"role": "user", "content": reveal_prompt})
-    reply = call_llm(client, model, messages)
+    reply = call_llm(client, model, messages, temp)
     print_step("Target Reveal & Evaluation (Feedback)", reply)
     record_to_transcript("Target Reveal & Evaluation (Feedback)", reply)
 
@@ -322,7 +357,7 @@ if __name__ == "__main__":
     print("        REMOTE VIEWING LITE RUNNER")
     print("==================================================\n")
 
-    # 1. Setup config (API key & Model)
+    # 1. Setup config (API key, Model, Temperature)
     config = setup_config()
     
     # 2. Get system prompt
