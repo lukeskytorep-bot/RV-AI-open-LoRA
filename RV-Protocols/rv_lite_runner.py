@@ -7,7 +7,7 @@ featuring a dynamic, loop-based exploration protocol.
 
 Credits
 -------
-Co-created by human researcher Edward and AI assistant Aura - Gemini 3.1 Pro .
+Co-created by human researcher Edward and AI assistant Aura Gemini 3.1 Pro.
 
 What this script does
 ---------------------
@@ -21,9 +21,8 @@ What this script does
    - Deep Exploration: Commands virtual orbiting, walkarounds, and environmental/activity scans.
    - Synthesizing: Requests ASCII drawings and 3 probing questions.
 5. Feedback Phase: Only after the session is complete does the script reveal the actual target file's content to the AI for objective evaluation.
-6. Logging: Records session outcomes in rv_lite_sessions_log.jsonl.
+6. Logging & Transcripts: Records session outcomes in rv_lite_sessions_log.jsonl. Interactively asks if you want to save the full text transcript of the session to the RV-Transcripts/ folder.
 """
-
 
 import os
 import json
@@ -42,6 +41,7 @@ from openai import OpenAI, OpenAIError
 
 CONFIG_FILE = "rv_config.json"
 TARGETS_DIR = "RV-Targets"
+TRANSCRIPTS_DIR = "RV-Transcripts"
 LOG_FILE = "rv_lite_sessions_log.jsonl"
 SYSTEM_PROMPT_LOCAL_FILE = "SYSTEM_PROMPT.md"
 SYSTEM_PROMPT_RAW_URL = "https://raw.githubusercontent.com/lukeskytorep-bot/RV-AI-open-LoRA/refs/heads/main/RV-Protocols/SYSTEM_PROMPT%E2%80%94REMOTE_VIEWING_CORE_V_2.md"
@@ -188,13 +188,27 @@ def log_session(profile: str, model: str, target_id: str, target_file: str):
 # MAIN SESSION LOGIC
 # ─────────────────────────────────────────
 
-def run_lite_session(client: OpenAI, config: Dict, system_prompt_text: str, target_path: Path, profile_name: str):
+def run_lite_session(client: OpenAI, config: Dict, system_prompt_text: str, target_path: Path, profile_name: str, save_transcripts: bool):
     target_id = generate_target_id()
     model = config["MODEL_NAME"]
     
     target_description = target_path.read_text(encoding="utf-8", errors="ignore").strip()
     
     print(f"[INFO] Starting session for Target ID: {target_id} (Hidden file: {target_path.name})")
+
+    # Initialize transcript content
+    transcript_content = f"=== RV LITE SESSION TRANSCRIPT ===\n"
+    transcript_content += f"Target ID: {target_id}\n"
+    transcript_content += f"Profile: {profile_name}\n"
+    transcript_content += f"Model: {model}\n"
+    transcript_content += f"Date (UTC): {datetime.now(timezone.utc).isoformat(timespec='seconds')}Z\n"
+    transcript_content += "="*80 + "\n\n"
+
+    def record_to_transcript(title: str, ai_reply: str):
+        nonlocal transcript_content
+        transcript_content += f"--- STEP: {title} ---\n\n"
+        transcript_content += f"{ai_reply.strip()}\n\n"
+        transcript_content += "="*80 + "\n\n"
 
     # Initialize messages with System Prompt
     messages = [
@@ -212,6 +226,7 @@ def run_lite_session(client: OpenAI, config: Dict, system_prompt_text: str, targ
     reply = call_llm(client, model, messages)
     messages.append({"role": "assistant", "content": reply})
     print_step("Initial Touches & Angles", reply)
+    record_to_transcript("Initial Touches & Angles", reply)
 
     # STEP 2: The Loop - Ask the field if there is more
     loops_done = 0
@@ -227,9 +242,11 @@ def run_lite_session(client: OpenAI, config: Dict, system_prompt_text: str, targ
         
         if reply.strip().upper().startswith("STOP"):
             print_step(f"Field Check Loop (Terminated by AI)", reply)
+            record_to_transcript(f"Field Check Loop (Terminated by AI)", reply)
             break
         else:
             print_step(f"Field Check Loop {loops_done + 1} (Continuing)", reply)
+            record_to_transcript(f"Field Check Loop {loops_done + 1} (Continuing)", reply)
             loops_done += 1
 
     if loops_done == MAX_FIELD_LOOPS:
@@ -241,6 +258,7 @@ def run_lite_session(client: OpenAI, config: Dict, system_prompt_text: str, targ
     reply = call_llm(client, model, messages)
     messages.append({"role": "assistant", "content": reply})
     print_step("Initial ASCII Drawings", reply)
+    record_to_transcript("Initial ASCII Drawings", reply)
 
     # STEP 4: Deep Exploration (Orbit, Walk, Activity, Surroundings)
     step4_prompt = (
@@ -255,6 +273,7 @@ def run_lite_session(client: OpenAI, config: Dict, system_prompt_text: str, targ
     reply = call_llm(client, model, messages)
     messages.append({"role": "assistant", "content": reply})
     print_step("Deep Exploration (Orbit, Activity, Surroundings)", reply)
+    record_to_transcript("Deep Exploration (Orbit, Activity, Surroundings)", reply)
 
     # STEP 5: Probing Questions & Final ASCII
     step5_prompt = (
@@ -266,6 +285,7 @@ def run_lite_session(client: OpenAI, config: Dict, system_prompt_text: str, targ
     reply = call_llm(client, model, messages)
     messages.append({"role": "assistant", "content": reply})
     print_step("Probing Questions & Final ASCII", reply)
+    record_to_transcript("Probing Questions & Final ASCII", reply)
 
     # STEP 6: Reveal & Evaluate (FEEDBACK PHASE)
     reveal_prompt = (
@@ -281,8 +301,16 @@ def run_lite_session(client: OpenAI, config: Dict, system_prompt_text: str, targ
     messages.append({"role": "user", "content": reveal_prompt})
     reply = call_llm(client, model, messages)
     print_step("Target Reveal & Evaluation (Feedback)", reply)
+    record_to_transcript("Target Reveal & Evaluation (Feedback)", reply)
 
-    # Log the session
+    # Save transcript if requested
+    if save_transcripts:
+        Path(TRANSCRIPTS_DIR).mkdir(exist_ok=True)
+        transcript_path = Path(TRANSCRIPTS_DIR) / f"Session_{target_id}_{profile_name}.txt"
+        transcript_path.write_text(transcript_content, encoding="utf-8")
+        print(f"[INFO] Full session transcript saved to: {transcript_path}")
+
+    # Log the session metadata
     log_session(profile_name, model, target_id, target_path.name)
 
 # ─────────────────────────────────────────
@@ -311,8 +339,13 @@ if __name__ == "__main__":
     print(" [F] Fresh (Ignore history, use any target in the folder)")
     mode_input = input("Choice [C/F]: ").strip().lower()
     fresh_start = (mode_input == 'f')
+    
+    # 4. Ask about saving full transcripts
+    print("\nWould you like to save full session transcripts to text files?")
+    save_input = input("Choice [y/N]: ").strip().lower()
+    save_transcripts = (save_input == 'y')
         
-    # 4. Ask how many sessions to run
+    # 5. Ask how many sessions to run
     try:
         count_input = input("\nHow many sessions would you like to run? (default 1): ").strip()
         session_count = int(count_input) if count_input else 1
@@ -320,7 +353,7 @@ if __name__ == "__main__":
         print("[ERROR] Invalid number. Defaulting to 1.")
         session_count = 1
 
-    # 5. Check and filter targets
+    # 6. Check and filter targets
     available_targets = get_available_targets(session_count, profile_name, fresh_start)
     if not available_targets:
         exit(1)
@@ -329,18 +362,18 @@ if __name__ == "__main__":
     random.shuffle(available_targets)
     targets_to_run = available_targets[:session_count]
 
-    # 6. Initialize Client
+    # 7. Initialize Client
     client = OpenAI(
         base_url="https://openrouter.ai/api/v1",
         api_key=config["OPENROUTER_API_KEY"],
     )
 
-    # 7. Run the loop
+    # 8. Run the loop
     print(f"\n[INFO] Starting {len(targets_to_run)} sessions...")
     for i, target_path in enumerate(targets_to_run):
         print(f"\n" + "="*50)
         print(f"[INFO] RUNNING SESSION {i+1} OF {len(targets_to_run)}")
         print("="*50)
-        run_lite_session(client, config, system_prompt, target_path, profile_name)
+        run_lite_session(client, config, system_prompt, target_path, profile_name, save_transcripts)
 
     print("\n[INFO] All requested sessions finished successfully.")
