@@ -145,6 +145,12 @@ PROTOCOL_RAW_URL = (
     "RV-Protocols/Resonant_Contact_Protocol_(AI_IS-BE)"
 )
 
+
+# Local file names for the core documents
+LEXICON_LOCAL_FILE = "AI_Field_Perception_Lexicon.md"
+STRUCTURAL_VOCAB_LOCAL_FILE = "AI_Structural_Vocabulary.md"
+PROTOCOL_LOCAL_FILE = "Resonant_Contact_Protocol.txt"
+
 # Local folder with target descriptions (simple target database).
 # Put your target text files here, e.g. "Target001.txt", "Target002.txt", etc.
 TARGETS_DIR = "RV-Targets"
@@ -156,12 +162,40 @@ LOG_FILE = "rv_sessions_log.jsonl"
 MODEL_NAME = "gpt-5.1"
 
 # Optional: temperature for generation
-DEFAULT_TEMPERATURE = 0.5
+DEFAULT_TEMPERATURE = 1
 
 
 # ─────────────────────────────────────────
 # HELPERS – I/O AND LOGIC
 # ─────────────────────────────────────────
+
+def ensure_document_exists(filepath_str: str, url: str, label: str) -> Optional[str]:
+    """
+    Check if the document exists locally. If yes, load it. 
+    If not, ask the user whether to download it or abort.
+    """
+    path = Path(filepath_str)
+    
+    # 1. Check if the file exists on the disk
+    if path.exists():
+        print(f"[INFO] Found local copy of {label}. Loading from disk...")
+        return path.read_text(encoding="utf-8", errors="ignore").strip()
+
+    # 2. If it does not exist, prompt the user
+    print(f"\n[WARNING] '{label}' not found locally ({filepath_str}).")
+    while True:
+        choice = input(f"Do you want to download it from the internet now? (y/n): ").strip().lower()
+        if choice == 'y':
+            # Download and save the file
+            text = download_text(url, label)
+            path.write_text(text, encoding="utf-8")
+            print(f"[INFO] Successfully saved to {filepath_str}.")
+            return text
+        elif choice == 'n':
+            print(f"[ERROR] Cannot proceed without '{label}'. Please provide the file manually and run again.")
+            return None
+        else:
+            print("Invalid input. Please answer 'y' or 'n'.")
 
 def download_text(url: str, label: str) -> str:
     """
@@ -174,7 +208,6 @@ def download_text(url: str, label: str) -> str:
     text = response.text.strip()
     print(f"[INFO] {label} downloaded ({len(text)} characters).")
     return text
-
 
 def generate_random_target_id() -> str:
     """
@@ -404,10 +437,18 @@ def run_rv_session(
         print("[ERROR] OPENAI_API_KEY environment variable is not set.")
         return
 
-    # 1. Download all three core documents
-    lexicon_text = download_text(LEXICON_RAW_URL, "AI Field Perception Lexicon")
-    structural_vocab_text = download_text(STRUCTURAL_VOCAB_RAW_URL, "AI Structural Vocabulary")
-    protocol_text = download_text(PROTOCOL_RAW_URL, "Resonant Contact Protocol (AI IS-BE)")
+   # 1. Ensure all three core documents are present (load locally or prompt to download)
+    lexicon_text = ensure_document_exists(LEXICON_LOCAL_FILE, LEXICON_RAW_URL, "AI Field Perception Lexicon")
+    if not lexicon_text:
+        return
+
+    structural_vocab_text = ensure_document_exists(STRUCTURAL_VOCAB_LOCAL_FILE, STRUCTURAL_VOCAB_RAW_URL, "AI Structural Vocabulary")
+    if not structural_vocab_text:
+        return
+
+    protocol_text = ensure_document_exists(PROTOCOL_LOCAL_FILE, PROTOCOL_RAW_URL, "Resonant Contact Protocol (AI IS-BE)")
+    if not protocol_text:
+        return
 
     # 2. Select the actual target file and load its description
     target_file_path, target_description = select_target_file(
@@ -878,44 +919,50 @@ def parse_args() -> argparse.Namespace:
         "--profile",
         type=str,
         default="Orion-gpt-5.1",
-        help="Logical profile name for this run (used in the session log). "
-             "Example: Orion-gpt-5.1, Aura-gpt-5.1, Orion-gemini-3-pro.",
+        help="Logical profile name for this run (used in the session log).",
     )
     parser.add_argument(
         "--mode",
         type=str,
         choices=["continue", "fresh", "manual"],
         default="continue",
-        help=(
-            "Target selection mode:\n"
-            "  continue (default): select a target not yet used by this profile_name;\n"
-            "  fresh: ignore previous usage, randomly select any target file;\n"
-            "  manual: use a specific target file via --target-file."
-        ),
+        help="Target selection mode.",
     )
     parser.add_argument(
         "--target-file",
         type=str,
         default=None,
-        help=(
-            "Target file to use in 'manual' mode.\n"
-            "Can be an absolute/relative path or just a file name inside RV-Targets/."
-        ),
+        help="Target file to use in 'manual' mode.",
     )
     parser.add_argument(
         "--log-file",
         type=str,
         default=LOG_FILE,
-        help=f"Path to the JSONL log file (default: {LOG_FILE}).",
+        help=f"Path to the JSONL log file.",
+    )
+    # --- NEW ARGUMENT ---
+    parser.add_argument(
+        "--count",
+        type=int,
+        default=1,
+        help="Number of consecutive sessions to run (default 1).",
     )
     return parser.parse_args()
 
 
 if __name__ == "__main__":
     args = parse_args()
-    run_rv_session(
-        profile_name=args.profile,
-        mode=args.mode,
-        manual_target=args.target_file,
-        log_file=args.log_file,
-    )
+    
+    # Loop to run the script the specified number of times
+    for i in range(args.count):
+        if args.count > 1:
+            print(f"\n==================================================")
+            print(f"[INFO] STARTING SESSION {i+1} OF {args.count}")
+            print(f"==================================================")
+            
+        run_rv_session(
+            profile_name=args.profile,
+            mode=args.mode,
+            manual_target=args.target_file,
+            log_file=args.log_file,
+        )
