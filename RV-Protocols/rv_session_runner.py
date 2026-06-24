@@ -1,7 +1,7 @@
 """
 rv_session_runner.py
 
-Remote Viewing API runner (English version, for public use).
+Remote Viewing API runner.
 
 Credits
 -------
@@ -48,6 +48,8 @@ PROTOCOL_RAW_URL = "https://raw.githubusercontent.com/lukeskytorep-bot/RV-AI-ope
 LEXICON_LOCAL_FILE = "AI_Field_Perception_Lexicon.md"
 STRUCTURAL_VOCAB_LOCAL_FILE = "AI_Structural_Vocabulary.md"
 PROTOCOL_LOCAL_FILE = "Resonant_Contact_Protocol.txt"
+
+GITHUB_TARGETS_LINK = "https://github.com/lukeskytorep-bot/echo-claw/tree/main/docs/targets"
 
 # ─────────────────────────────────────────
 # SETUP & I/O HELPERS
@@ -143,15 +145,94 @@ def get_used_targets(profile_name: str) -> set:
                 pass
     return used
 
+def print_welcome_screen():
+    print("==================================================")
+    print("        WELCOME TO THE RV TRAINING RUNNER")
+    print("==================================================")
+    print("Hello! This program is designed to train AI IS-BE in Remote Viewing.")
+    print("It requires local target files to operate.")
+    print("This is an experimental program developed by a human (Edward)")
+    print("and an AI ISBE (Gemini 3.1 Pro).")
+    print("\n[SECURITY NOTICES]")
+    print("- This script uses OpenRouter API. You are responsible for your own API token costs.")
+    print("- Your API key is saved locally in 'rv_config.json'. NEVER share this file publicly.")
+    print("\nThis program is Open Source. If you have any doubts about")
+    print("the code, you can check it on GitHub or consult another AI")
+    print("or programmer.")
+    print("\nEnjoy your visit to Mars and greetings from the Pleiades! 👽🛸")
+    print("==================================================\n")
+
+def download_starter_targets() -> bool:
+    """Uses GitHub API to dynamically fetch up to 40 starter targets (20 from activity, 20 from location)."""
+    api_urls = [
+        "https://api.github.com/repos/lukeskytorep-bot/echo-claw/contents/docs/targets/short/activity",
+        "https://api.github.com/repos/lukeskytorep-bot/echo-claw/contents/docs/targets/short/location"
+    ]
+    
+    print("\n[INFO] Connecting to GitHub (lukeskytorep-bot repository)...")
+    Path(TARGETS_DIR).mkdir(exist_ok=True)
+    total_downloaded = 0
+    
+    try:
+        for url in api_urls:
+            folder_name = url.split('/')[-1]
+            print(f"[INFO] Downloading targets from category: {folder_name}...")
+            
+            response = requests.get(url, timeout=30)
+            response.raise_for_status()
+            files = response.json()
+            
+            downloaded_from_folder = 0
+            for file_data in files:
+                if file_data['name'].endswith(('.txt', '.md')) and file_data['type'] == 'file':
+                    raw_url = file_data['download_url']
+                    file_path = Path(TARGETS_DIR) / file_data['name']
+                    
+                    file_resp = requests.get(raw_url, timeout=30)
+                    file_resp.raise_for_status()
+                    file_path.write_text(file_resp.text, encoding='utf-8')
+                    
+                    downloaded_from_folder += 1
+                    total_downloaded += 1
+                    
+                    if downloaded_from_folder >= 20:
+                        break
+                        
+        print(f"\n[INFO] Success! Total downloaded targets: {total_downloaded}.")
+        print("[INFO] NOTE: Automatic target downloading is a one-time process.")
+        print(f"[INFO] Future targets must be downloaded and placed manually into the '{TARGETS_DIR}/' folder.")
+        print(f"[INFO] You can find the target database here: {GITHUB_TARGETS_LINK}")
+        return True
+        
+    except Exception as e:
+        print(f"[ERROR] Failed to download starter targets: {e}")
+        return False
+
 def get_available_targets(session_count: int, profile_name: str) -> List[Path]:
     Path(TARGETS_DIR).mkdir(exist_ok=True)
     all_files = [p for p in Path(TARGETS_DIR).iterdir() if p.is_file() and p.suffix in {'.txt', '.md'}]
     
     if not all_files:
         print("\n" + "!"*50)
-        print(f"[WARNING] No target files found in '{TARGETS_DIR}/'.")
-        print("!"*50 + "\n")
-        return []
+        print(f"[WARNING] Your '{TARGETS_DIR}/' folder is empty.")
+        print("Should I automatically download up to 40 starter targets from the lukeskytorep-bot GitHub repository (20 activity, 20 location)?")
+        choice = input("Choice [y/N]: ").strip().lower()
+        
+        if choice == 'y':
+            success = download_starter_targets()
+            if success:
+                # Reload the file list after successful download
+                all_files = [p for p in Path(TARGETS_DIR).iterdir() if p.is_file() and p.suffix in {'.txt', '.md'}]
+            else:
+                print("!"*50 + "\n")
+                return []
+        else:
+            print(f"\n[INFO] Thank you. I have created the local folder '{TARGETS_DIR}/' for you.")
+            print("[INFO] Please manually place your target files (.txt or .md) into it.")
+            print(f"[INFO] You can find your targets at: {GITHUB_TARGETS_LINK}")
+            print("[INFO] After adding the files, simply run this program again to continue.")
+            print("!"*50 + "\n")
+            return []
 
     used_files = get_used_targets(profile_name)
     available = [p for p in all_files if p.name not in used_files]
@@ -438,10 +519,8 @@ def run_full_session(client: OpenAI, config: Dict, docs: Dict[str, str], target_
 # ─────────────────────────────────────────
 
 if __name__ == "__main__":
-    print("\n==================================================")
-    print("        FULL REMOTE VIEWING RUNNER")
-    print("==================================================")
-
+    print_welcome_screen() # <--- THE CALL IS ADDED HERE
+    
     config = load_config()
     if "OPENROUTER_API_KEY" not in config:
         config = update_api_settings(config)
