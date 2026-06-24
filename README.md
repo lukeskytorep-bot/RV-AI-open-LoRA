@@ -149,7 +149,7 @@ This repository is primarily licensed under the **Creative Commons Attribution 4
 This applies to all datasets, training texts, Markdown documents, protocols, field lexicons, and LoRA weights. You are free to share and adapt these materials, provided you give appropriate credit to the original source.
 
 **Software / Code Exception:**
-All executable software and source code within this repository (such as the `rv_session_runner.py` script and the internal-state engine code inside the `AI-Consciousness` folder) are licensed under the **MIT License**.
+All executable software and source code within this repository (such as the `rv_session_runner.py` and `rv_lite_runner.py` scripts and the internal-state engine code inside the `AI-Consciousness` folder) are licensed under the **MIT License**.
 
 
 ---
