@@ -352,8 +352,8 @@ def run_lite_session(client: OpenAI, config: Dict, system_prompt_text: str, targ
     step4_prompt = (
         "Phase 3: Deep Exploration.\n"
         "- Orbit the target close and far.\n"
-        "- Take a virtual walk around the target.\n"
-        "- Go to the main activity/event happening here and describe it.\n"
+        "- Take a walk around the target.\n"
+        "- Go to the main activity/event and describe.\n"
         "- Describe the immediate surroundings and environment.\n\n"
         "Keep providing raw structural/sensory data without naming the target."
     )
