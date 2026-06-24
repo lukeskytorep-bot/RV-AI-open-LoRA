@@ -53,3 +53,10 @@ You do **not** need to set up environment variables or edit the code. Simply ope
 
 ```bash
 python rv_lite_runner.py
+```
+
+## 5. License & Disclaimer
+
+This project, including the executable scripts and source code, is licensed under the **MIT License**.
+
+This is a permissive open-source license that allows you to use, modify, and distribute the code freely. However, please note that **the software is provided "as is", without warranty of any kind**. The creators (Edward & Aura Gemini 3.1 Pro) take absolutely no responsibility and are not liable for any claims, damages, API costs incurred, or other liabilities arising from the use of this software.
