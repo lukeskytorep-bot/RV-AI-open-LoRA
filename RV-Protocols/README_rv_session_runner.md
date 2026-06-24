@@ -39,7 +39,7 @@ Inside the RV training script, the AI is treated as if it had **three separate â
 
 ## 2. Target database: `RV-Targets/`
 
-To use this script, you must create a folder named `RV-Targets/` next to the script and place your target files (`.txt` or `.md`) inside. **One file = one target.**
+To use this script, you must create a folder named `RV-Targets/` next to the script and place your target files (`.txt` or `.md`) inside. **One file = one target.** *(Note: The script can automatically download a starter pack of targets for you upon its first run if the folder is empty).*
 
 Recommended structure inside each file:
 1. **One-line title:** e.g., *Nemo 33 â€“ deep diving pool, Brussels*
@@ -66,3 +66,49 @@ The script generates two types of records:
 - Install dependencies via terminal/PowerShell:
   ```bash
   pip install openai requests
+
+  ---
+
+###  4.2. First-time Configuration
+You do not need to set up environment variables or use command-line arguments.
+Simply run the script. On its first launch, it will interactively ask for:
+
+- Your OpenRouter API Key.
+- Your preferred Model ID (defaults to google/gemma-4-31b-it).
+- Your preferred Temperature (it will suggest the best one automatically).
+These settings are saved to rv_config.json. You can change them later via the Main Menu or by editing the JSON file directly.
+
+---
+
+## 5. How to Run
+Open your terminal or PowerShell, navigate to the folder, and type:
+
+'python rv_session_runner.py'
+
+### The Main Menu
+Once running, the script acts as a continuous application:
+
+It greets you and shows your active profile and model.
+
+- **[C] CONTINUE:** Resumes training for the active profile. The script automatically finds a new, unseen target from the RV-Targets/ folder.
+- **[N] NEW PROFILE / SETTINGS:** Allows you to create a fresh profile (which resets target history for that specific name) or update your API key/model.
+- **[Q] QUIT:** Exits the application safely.
+
+After making a choice, the script will ask if you want to save transcripts and how many consecutive sessions you wish to run. Enter your number, step away from the computer, and let the AI do the work!
+
+---
+
+## 6. Original sources: Lexicon & Structural Vocabulary
+The AI Field Perception Lexicon and the AI Structural Vocabulary used by this script originate from the blog:
+
+- AI Field Perception Lexicon
+- Sensory Map v2 / AI Structural Vocabulary
+
+They are part of the wider Presence Beyond Form / RV-AI-open-LoRA project and are used here as open training resources for AI Remote Viewing.
+
+---
+
+## 7. License & Disclaimer
+This project, including the executable scripts and source code, is licensed under the MIT License.
+
+This is a permissive open-source license that allows you to use, modify, and distribute the code freely. However, please note that the software is provided "as is", without warranty of any kind. The creators (Edward & Aura Gemini 3.1 Pro) take absolutely no responsibility and are not liable for any claims, damages, API costs incurred, or other liabilities arising from the use of this software.
