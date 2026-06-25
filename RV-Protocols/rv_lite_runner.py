@@ -12,17 +12,19 @@ Co-created by human researcher Edward and AI assistant Aura Gemini 3.1 Pro.
 What this script does
 ---------------------
 1. Smart Startup: Remembers your last profile and asks if you want to continue or start fresh.
-2. Security Check: Asks for explicit permission before downloading the System Prompt from GitHub.
-3. Strict Target Memory: Automatically ensures the active profile NEVER sees the same target twice.
-4. Blind Protocol: Random ID assignment, initial touches, dynamic data loops, and deep exploration.
-5. Clean Reveal: Displays the actual target to the user BEFORE the AI's evaluation.
-6. Seamless Automation: Runs multiple sessions back-to-back without manual pausing, saving transcripts automatically.
-7. Main App Loop: Keeps running after sessions, offering a menu to continue, switch profiles, or quit.
+2. Independent Profiles: Saves API key, model, and temperature individually for each profile.
+3. Connection Guard: Includes a 3-try retry mechanism to protect against API timeouts.
+4. Strict Target Memory: Automatically ensures the active profile NEVER sees the same target twice.
+5. Blind Protocol: Random ID assignment, initial touches, dynamic data loops, and deep exploration.
+6. Clean Reveal & Eval: Displays the actual target BEFORE the AI's evaluation.
+7. Post-Session Exercises: Optionally runs sensory calibration exercises after the target reveal.
+8. Seamless Automation & Loop: Runs multiple sessions and returns to the main menu.
 """
 
 import os
 import json
 import random
+import time
 import textwrap
 from datetime import datetime, timezone
 from pathlib import Path
@@ -40,10 +42,14 @@ TARGETS_DIR = "RV-Targets"
 TRANSCRIPTS_DIR = "RV-Transcripts"
 LOG_FILE = "rv_lite_sessions_log.jsonl"
 SYSTEM_PROMPT_LOCAL_FILE = "SYSTEM_PROMPT.md"
+EXERCISES_LOCAL_FILE = "Exercises_in_RV_for_AI.md"
+
 SYSTEM_PROMPT_RAW_URL = "https://raw.githubusercontent.com/lukeskytorep-bot/RV-AI-open-LoRA/refs/heads/main/RV-Protocols/SYSTEM_PROMPT%E2%80%94REMOTE_VIEWING_CORE_V_2.md"
+EXERCISES_RAW_URL = "https://raw.githubusercontent.com/lukeskytorep-bot/RV-AI-open-LoRA/refs/heads/main/RV-Protocols/Exercises_in_RV_%20for_AI.md"
 GITHUB_TARGETS_LINK = "https://github.com/lukeskytorep-bot/echo-claw/tree/main/docs/targets"
 
 MAX_FIELD_LOOPS = 3
+MAX_API_RETRIES = 3
 
 # ─────────────────────────────────────────
 # SETUP & I/O HELPERS
@@ -58,70 +64,81 @@ def get_optimal_temperature(model_name: str) -> float:
     return 1.0
 
 def load_config() -> Dict:
-    """Loads the config file. Creates a default one if missing."""
+    """Loads the config file as an address book of profiles."""
     config_path = Path(CONFIG_FILE)
     if config_path.exists():
         with open(config_path, "r") as f:
             return json.load(f)
-    return {}
+    return {"profiles": {}, "LAST_PROFILE": ""}
 
 def save_config(config: Dict):
     with open(CONFIG_FILE, "w") as f:
         json.dump(config, f, indent=4)
 
-def update_api_settings(config: Dict) -> Dict:
-    """Prompts the user to update API key, model, and temp."""
-    print("\n--- UPDATE API SETTINGS ---")
-    current_key = config.get("OPENROUTER_API_KEY", "")
+def update_api_settings(config: Dict, profile_name: str) -> Dict:
+    """Prompts the user to update API settings for a SPECIFIC profile."""
+    print(f"\n--- UPDATE API SETTINGS FOR PROFILE: {profile_name} ---")
+    
+    if "profiles" not in config:
+        config["profiles"] = {}
+    if profile_name not in config["profiles"]:
+        config["profiles"][profile_name] = {}
+        
+    profile_data = config["profiles"][profile_name]
+    
+    current_key = profile_data.get("OPENROUTER_API_KEY", "")
     key_prompt = f"Enter OpenRouter API Key (Press Enter to keep current): " if current_key else "Please enter your OpenRouter API Key: "
     api_key = input(key_prompt).strip()
     if api_key:
-        config["OPENROUTER_API_KEY"] = api_key
+        profile_data["OPENROUTER_API_KEY"] = api_key
 
-    current_model = config.get("MODEL_NAME", "google/gemma-4-31b-it")
+    current_model = profile_data.get("MODEL_NAME", "google/gemma-4-31b-it")
     model_input = input(f"Enter model ID to use (Press Enter for '{current_model}'): ").strip()
     if model_input:
-        config["MODEL_NAME"] = model_input
+        profile_data["MODEL_NAME"] = model_input
+    elif "MODEL_NAME" not in profile_data:
+        profile_data["MODEL_NAME"] = current_model
 
-    optimal_temp = get_optimal_temperature(config["MODEL_NAME"])
-    print(f"[INFO] Recommended temperature for '{config['MODEL_NAME']}' is {optimal_temp}.")
-    current_temp = config.get("TEMPERATURE", optimal_temp)
+    optimal_temp = get_optimal_temperature(profile_data["MODEL_NAME"])
+    print(f"[INFO] Recommended temperature for '{profile_data['MODEL_NAME']}' is {optimal_temp}.")
+    current_temp = profile_data.get("TEMPERATURE", optimal_temp)
     temp_input = input(f"Enter temperature (Press Enter to keep {current_temp}): ").strip()
     
     if temp_input:
         try:
-            config["TEMPERATURE"] = float(temp_input)
+            profile_data["TEMPERATURE"] = float(temp_input)
         except ValueError:
             print("[WARNING] Invalid input. Keeping previous temperature.")
-    elif "TEMPERATURE" not in config:
-        config["TEMPERATURE"] = optimal_temp
+    elif "TEMPERATURE" not in profile_data:
+        profile_data["TEMPERATURE"] = optimal_temp
 
+    config["profiles"][profile_name] = profile_data
     save_config(config)
     return config
 
-def ensure_system_prompt() -> Optional[str]:
-    path = Path(SYSTEM_PROMPT_LOCAL_FILE)
+def ensure_document(local_file: str, raw_url: str, doc_name: str) -> Optional[str]:
+    path = Path(local_file)
     if path.exists():
         return path.read_text(encoding="utf-8", errors="ignore").strip()
 
-    print(f"\n[WARNING] System Prompt not found locally ({SYSTEM_PROMPT_LOCAL_FILE}).")
-    choice = input("Do you want me to download it automatically from GitHub? [y/N]: ").strip().lower()
+    print(f"\n[WARNING] '{doc_name}' not found locally ({local_file}).")
+    choice = input(f"Do you want me to download it automatically from GitHub? [y/N]: ").strip().lower()
     
     if choice == 'y':
-        print(f"[INFO] Downloading from: {SYSTEM_PROMPT_RAW_URL}")
+        print(f"[INFO] Downloading from: {raw_url}")
         try:
-            response = requests.get(SYSTEM_PROMPT_RAW_URL, timeout=30)
+            response = requests.get(raw_url, timeout=30)
             response.raise_for_status()
             text = response.text.strip()
             path.write_text(text, encoding="utf-8")
-            print("[INFO] System Prompt downloaded and saved.")
+            print(f"[INFO] {doc_name} downloaded and saved.")
             return text
         except Exception as e:
-            print(f"[ERROR] Failed to download System Prompt: {e}")
+            print(f"[ERROR] Failed to download {doc_name}: {e}")
             return None
     else:
-        print("\n[INFO] Thank you. Please place the 'SYSTEM_PROMPT.md' file manually in the same folder as this script.")
-        print("[INFO] Once the file is in place, simply run 'python rv_lite_runner.py' again to continue.")
+        print(f"\n[INFO] Thank you. Please place the '{local_file}' file manually in the same folder as this script.")
+        print("[INFO] Once the file is in place, simply run the script again to continue.")
         return None
 
 def get_used_targets(profile_name: str) -> set:
@@ -211,7 +228,7 @@ def get_available_targets(session_count: int, profile_name: str) -> List[Path]:
     if not all_files:
         print("\n" + "!"*50)
         print(f"[WARNING] Your '{TARGETS_DIR}/' folder is empty.")
-        print("Should I automatically download 40 starter targets from the lukeskytorep-bot GitHub repository (20 activity, 20 location)?")
+        print("Should I automatically download up to 40 starter targets from the lukeskytorep-bot GitHub repository (20 activity, 20 location)?")
         choice = input("Choice [y/N]: ").strip().lower()
         
         if choice == 'y':
@@ -248,16 +265,43 @@ def generate_target_id() -> str:
     return "".join(str(random.randint(0, 9)) for _ in range(8))
 
 def call_llm(client: OpenAI, model: str, messages: List[Dict], temperature: float) -> str:
-    try:
-        completion = client.chat.completions.create(
-            model=model,
-            messages=messages,
-            temperature=temperature,
-        )
-        return completion.choices[0].message.content
-    except OpenAIError as e:
-        print(f"[ERROR] API error: {e}")
-        raise
+    """Makes the API call with a 3-try retry mechanism to prevent timeout crashes."""
+    for attempt in range(1, MAX_API_RETRIES + 1):
+        try:
+            completion = client.chat.completions.create(
+                model=model,
+                messages=messages,
+                temperature=temperature,
+            )
+            
+            if not completion or not completion.choices:
+                print(f"[WARNING] Attempt {attempt}/{MAX_API_RETRIES}: API returned empty response.")
+                if attempt < MAX_API_RETRIES:
+                    time.sleep(2)
+                    continue
+                return "[ERROR] API returned an empty or invalid response after maximum retries. The model may have filtered the prompt or timed out."
+            
+            return completion.choices[0].message.content
+            
+        except OpenAIError as e:
+            print(f"[WARNING] Attempt {attempt}/{MAX_API_RETRIES}: API error: {e}")
+            if attempt < MAX_API_RETRIES:
+                time.sleep(2)
+                continue
+            
+            error_msg = (
+                f"\n[ERROR] User, I tried to connect to your provider's API, but their server is not responding.\n"
+                f"Possible causes: the server is down, lack of funds, or no internet connection.\n"
+                f"Please check what happened and try again later. (Error details: {e})\n"
+            )
+            print(error_msg)
+            return "[API CONNECTION ERROR]"
+            
+        except Exception as e:
+            print(f"[ERROR] Unexpected error in call_llm: {e}")
+            return f"[UNEXPECTED ERROR: {e}]"
+            
+    return "[ERROR] Failed to communicate with API."
 
 def print_step(title: str, text: str):
     print("\n" + "=" * 80)
@@ -282,10 +326,10 @@ def log_session(profile: str, model: str, target_id: str, target_file: str):
 # MAIN SESSION LOGIC
 # ─────────────────────────────────────────
 
-def run_lite_session(client: OpenAI, config: Dict, system_prompt_text: str, target_path: Path, profile_name: str, save_transcripts: bool):
+def run_lite_session(client: OpenAI, profile_data: Dict, system_prompt_text: str, exercises_text: Optional[str], target_path: Path, profile_name: str, save_transcripts: bool, run_exercises: bool):
     target_id = generate_target_id()
-    model = config["MODEL_NAME"]
-    temp = config.get("TEMPERATURE", 1.0)
+    model = profile_data["MODEL_NAME"]
+    temp = profile_data.get("TEMPERATURE", 1.0)
     
     target_description = target_path.read_text(encoding="utf-8", errors="ignore").strip()
     
@@ -318,6 +362,8 @@ def run_lite_session(client: OpenAI, config: Dict, system_prompt_text: str, targ
     messages.append({"role": "assistant", "content": reply})
     print_step("Initial Touches & Angles", reply)
     record_to_transcript("Initial Touches & Angles", reply)
+    
+    if "[ERROR]" in reply: return # Abort if API failed completely
 
     # STEP 2 (Loop)
     loops_done = 0
@@ -331,6 +377,8 @@ def run_lite_session(client: OpenAI, config: Dict, system_prompt_text: str, targ
         reply = call_llm(client, model, messages, temp)
         messages.append({"role": "assistant", "content": reply})
         
+        if "[ERROR]" in reply: return
+
         if reply.strip().upper().startswith("STOP"):
             print_step(f"Field Check Loop (Terminated by AI)", reply)
             record_to_transcript(f"Field Check Loop (Terminated by AI)", reply)
@@ -392,13 +440,28 @@ def run_lite_session(client: OpenAI, config: Dict, system_prompt_text: str, targ
         f"=== TARGET FILE CONTENT ===\n"
         f"{target_description}\n"
         f"===========================\n\n"
-        "Evaluate your session. What matched perfectly? What was partial? And what still needs improvement? Remember, sessions are for learning—every signal is valuable, you just need to understand what influenced its creation. "
+        "Evaluate your session. What matched perfectly? What was partial? And what still needs improvement? Remember, sessions are for learning — every signal is valuable, you just need to understand what influenced its creation. "
         "Do not retroactively change your session data, just analyze it objectively against this feedback."
     )
     messages.append({"role": "user", "content": reveal_prompt})
     reply = call_llm(client, model, messages, temp)
+    messages.append({"role": "assistant", "content": reply})
     print_step("AI Evaluation (Feedback)", reply)
     record_to_transcript("AI Evaluation (Feedback)", reply)
+
+    # STEP 7 (Optional Post-Session Exercises)
+    if run_exercises and exercises_text:
+        exercise_prompt = (
+            "These are exercises designed to help expand Remote Viewing capabilities and better understand the field mechanics.\n\n"
+            f"=== EXERCISES ===\n"
+            f"{exercises_text}\n"
+            f"=================\n\n"
+            "Please read them, select the ones you feel are most necessary for you right now after this specific session, and execute them."
+        )
+        messages.append({"role": "user", "content": exercise_prompt})
+        reply = call_llm(client, model, messages, temp)
+        print_step("Post-Session Exercises", reply)
+        record_to_transcript("Post-Session Exercises", reply)
 
     # Save and Log
     if save_transcripts:
@@ -415,13 +478,11 @@ def run_lite_session(client: OpenAI, config: Dict, system_prompt_text: str, targ
 # ─────────────────────────────────────────
 
 if __name__ == "__main__":
-    print_welcome_screen() # <--- THE CALL IS ADDED HERE
+    print_welcome_screen()
     
     config = load_config()
-    if "OPENROUTER_API_KEY" not in config:
-        config = update_api_settings(config)
 
-    system_prompt = ensure_system_prompt()
+    system_prompt = ensure_document(SYSTEM_PROMPT_LOCAL_FILE, SYSTEM_PROMPT_RAW_URL, "System Prompt")
     if not system_prompt:
         exit(0)
 
@@ -429,27 +490,34 @@ if __name__ == "__main__":
         last_profile = config.get("LAST_PROFILE", "")
         
         print("\n" + "-"*50)
-        if last_profile:
+        if last_profile and "profiles" in config and last_profile in config["profiles"]:
+            p_data = config["profiles"][last_profile]
             print(f"Welcome back! Last used profile: {last_profile}")
-            print(f"Current Model: {config.get('MODEL_NAME')} (Temp: {config.get('TEMPERATURE')})")
+            print(f"Current Model: {p_data.get('MODEL_NAME')} (Temp: {p_data.get('TEMPERATURE')})")
             print("\nWhat would you like to do?")
             print(" [C] CONTINUE with last profile (Ensures NO repeated targets)")
-            print(" [N] Create NEW profile or Change API settings")
+            print(" [N] Create NEW profile (Starts a fresh target history)")
+            print(" [S] Change API SETTINGS for current profile (Key, Model, Temperature)")
             print(" [Q] Quit")
-            choice = input("Choice [C/N/Q]: ").strip().upper()
+            choice = input("Choice [C/N/S/Q]: ").strip().upper()
             
             if choice == 'Q':
                 print("Exiting. See you next time!")
                 break
+            elif choice == 'S':
+                config = update_api_settings(config, last_profile)
+                profile_name = last_profile
             elif choice == 'N':
                 profile_name = input("\nEnter NEW Profile Name (e.g. Test-Claude): ").strip()
                 if not profile_name: profile_name = "Default-Profile"
-                config = update_api_settings(config)
+                if profile_name not in config.get("profiles", {}):
+                    config = update_api_settings(config, profile_name)
             else:
                 profile_name = last_profile
         else:
             profile_name = input("\nEnter Profile Name (e.g. Lite-Gemma): ").strip()
             if not profile_name: profile_name = "Default-Profile"
+            config = update_api_settings(config, profile_name)
 
         # Save active profile
         config["LAST_PROFILE"] = profile_name
@@ -458,6 +526,15 @@ if __name__ == "__main__":
         # Transcripts setting
         save_input = input("\nSave full session transcripts to text files? [y/N]: ").strip().lower()
         save_transcripts = (save_input == 'y')
+        
+        # Exercises setting
+        exercises_text = None
+        run_exercises = False
+        exercises_input = input("Should the AI perform sensory calibration exercises after each session? [y/N]: ").strip().lower()
+        if exercises_input == 'y':
+            exercises_text = ensure_document(EXERCISES_LOCAL_FILE, EXERCISES_RAW_URL, "RV Exercises Document")
+            if exercises_text:
+                run_exercises = True
 
         # Session count
         try:
@@ -475,9 +552,10 @@ if __name__ == "__main__":
         targets_to_run = available_targets[:session_count]
 
         # Init API
+        profile_data = config["profiles"][profile_name]
         client = OpenAI(
             base_url="https://openrouter.ai/api/v1",
-            api_key=config["OPENROUTER_API_KEY"],
+            api_key=profile_data["OPENROUTER_API_KEY"],
         )
 
         print(f"\n[INFO] Initializing batch of {len(targets_to_run)} sessions...")
@@ -485,7 +563,6 @@ if __name__ == "__main__":
             print(f"\n" + "="*50)
             print(f"[INFO] RUNNING SESSION {i+1} OF {len(targets_to_run)}")
             print("="*50)
-            run_lite_session(client, config, system_prompt, target_path, profile_name, save_transcripts)
+            run_lite_session(client, profile_data, system_prompt, exercises_text, target_path, profile_name, save_transcripts, run_exercises)
 
         print("\n[INFO] Batch finished successfully!")
-        # Loop restarts, bringing user back to the menu.
