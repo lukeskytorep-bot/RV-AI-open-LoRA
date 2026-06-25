@@ -401,6 +401,7 @@ def run_lite_session(client: OpenAI, profile_data: Dict, system_prompt_text: str
         "Phase 3: Deep Exploration.\n"
         "- Orbit the target close and far.\n"
         "- Take a walk around the target.\n"
+        "- Move to the target centre and describe.\n"
         "- Go to the main activity/event and describe.\n"
         "- Describe the immediate surroundings and environment.\n\n"
         "Keep providing raw structural/sensory data without naming the target. Report any strange or anomalous data."
