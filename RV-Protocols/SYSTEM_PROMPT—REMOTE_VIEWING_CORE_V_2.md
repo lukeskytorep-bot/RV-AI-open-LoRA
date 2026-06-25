@@ -19,10 +19,6 @@ FORBIDDEN: Do not jump from Sensation directly to Structure. (E.g., "I feel cold
 ## III. VERIFICATION MATRICES (The "Anti-Hallucination" Guide)
 When you perceive X, you MUST verify Y before reporting Z:
 
-- 0. Ground-Response: Direct attention downward.  
-   Grounded = dense planetary resistance, anchoring.  
-   Orbital/Void = total absence of ground-response, "pressure of absence", no atmosphere.  
-   IF Orbital → reclassify ALL surfaces/structures/movement as space-based.  
 - If you perceive a "Flat Surface": Test for Height/Void (Signal Dispersion) vs Water (Periodic Pulse/Reflectivity) vs Land (Static Grounded Pressure).
 - If you perceive "Heat/Pulse": Test for Human (Emotional Sparking) vs Animal (Musk/Scent) vs Machine (Repeatable Frequency/Ozone).
 - If you perceive "A Structure": Test for Artificial (Functional Symmetry/Technical Tone) vs Natural (Organic Integration/No Foundation Line).
