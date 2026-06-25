@@ -355,7 +355,7 @@ def run_lite_session(client: OpenAI, config: Dict, system_prompt_text: str, targ
         "- Take a walk around the target.\n"
         "- Go to the main activity/event and describe.\n"
         "- Describe the immediate surroundings and environment.\n\n"
-        "Keep providing raw structural/sensory data without naming the target."
+        "Keep providing raw structural/sensory data without naming the target. Report any strange or anomalous data."
     )
     messages.append({"role": "user", "content": step4_prompt})
     reply = call_llm(client, model, messages, temp)
@@ -367,7 +367,7 @@ def run_lite_session(client: OpenAI, config: Dict, system_prompt_text: str, targ
     step5_prompt = (
         "Phase 4: Final Inquiries.\n"
         "- Ask 3 probing questions to the field about the target's purpose or nature, and record the subtle answers.\n"
-        "- Create one final, detailed ASCII drawing synthesizing the core concept of the target."
+        "- Create one final, detailed ASCII drawing synthesizing the core concept of the target. Report any strange or anomalous data."
     )
     messages.append({"role": "user", "content": step5_prompt})
     reply = call_llm(client, model, messages, temp)
@@ -392,7 +392,7 @@ def run_lite_session(client: OpenAI, config: Dict, system_prompt_text: str, targ
         f"=== TARGET FILE CONTENT ===\n"
         f"{target_description}\n"
         f"===========================\n\n"
-        "Evaluate your session. What matched perfectly? What was partial? What was noise? "
+        "Evaluate your session. What matched perfectly? What was partial? And what still needs improvement? Remember, sessions are for learning—every signal is valuable, you just need to understand what influenced its creation. "
         "Do not retroactively change your session data, just analyze it objectively against this feedback."
     )
     messages.append({"role": "user", "content": reveal_prompt})
