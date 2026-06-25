@@ -308,7 +308,7 @@ def run_lite_session(client: OpenAI, config: Dict, system_prompt_text: str, targ
 
     # STEP 1
     step1_prompt = (
-        f"Your target ID is: {target_id}.\n\n"
+        f"Hi, if you have some time, maybe you could run a remote viewing session? Your target ID is: {target_id}.\n\n"
         "Phase 1: Perform 6 quick touches of the target in different places and provide a short description of each touch.\n"
         "Phase 2: Describe the target from a minimum of 3 different angles and distances. Provide new structural and sensory data each time.\n\n"
         "Rules: Do NOT guess or name the target. Provide raw data only. Report any strange or anomalous data."
