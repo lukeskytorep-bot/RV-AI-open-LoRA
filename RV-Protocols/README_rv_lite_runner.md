@@ -5,57 +5,70 @@
 
 This folder contains `rv_lite_runner.py` – a streamlined, lightweight script designed to run automated Remote Viewing (RV) sessions with Large Language Models via OpenRouter.
 
-Unlike the full `rv_session_runner.py` (which uses a complex three-brain setup with separate Lexicons and Vocabularies), this **Lite** version is faster, more dynamic, and cheaper on API tokens. It anchors the AI using a single, powerful **System Prompt** and uses an interactive, loop-based protocol to extract data.
+Unlike the full `rv_session_runner.py`, this **Lite** version is faster, more dynamic, and cheaper on API tokens. It anchors the AI using a single, powerful **System Prompt** and uses an interactive, loop-based protocol to extract data.
 
 ---
 
 ## 1. How the Lite Protocol Works
 
-1. **System Prompt Anchor:** The AI is given the `SYSTEM_PROMPT.md` at the very beginning. This defines its identity and rules for the entire session.
-2. **Strict Blind Targeting:** The script assigns a random 8-digit Target ID. The AI does *not* see the real target description until the very end.
-3. **Phase 1 & 2 (Initial Contact):** The AI performs 6 quick "touches" of the target and describes it from 3 different angles/distances.
-4. **The Dynamic Loop:** The script asks the AI: *"Does the field have more to say?"* - If the AI says `CONTINUE`, it performs 3 new touches and vectors.
-   - This loop repeats until the AI says `STOP` (or hits a hard limit of 3 loops to save your API budget).
-5. **Phase 3 (Deep Exploration):** The AI orbits the target, performs a virtual walkaround, and investigates the main activity and surroundings.
-6. **Phase 4 (Final Synthesis):** The AI asks 3 probing questions and generates a final ASCII drawing of the target based on its raw data.
-7. **Clean Reveal:** The script explicitly displays the actual target text on your screen.
-8. **Phase 5 (Feedback & Evaluation):** The AI objectively evaluates its own performance against the revealed target (perfect matches, partial matches, and noise).
+* **System Prompt Anchor:** The AI is given the `SYSTEM_PROMPT.md` at the very beginning to define its identity and rules.
+* **Strict Blind Targeting:** The script assigns a random 8-digit Target ID. The AI does not see the real target description until the very end.
+* **Phase 1 & 2 (Initial Contact):** The AI performs 6 quick touches and describes the target from 3 different angles.
+* **The Dynamic Loop:** The script asks if the field has more to say. If YES, it performs 3 new touches and vectors. This repeats until the AI says STOP (or hits a hard limit of 3 loops).
+* **Phase 3 (Deep Exploration):** The AI orbits the target, performs a walkaround, and investigates the surroundings.
+* **Phase 4 (Final Synthesis):** The AI asks probing questions and generates a final ASCII drawing.
+* **Clean Reveal:** The script explicitly displays the actual target text on your screen.
+* **Phase 5 (Feedback & Evaluation):** The AI objectively evaluates its own performance against the revealed target.
+* **Phase 6 (Post-Session Exercises):** Optionally, the script feeds the AI a set of sensory calibration exercises (`Exercises_in_RV_for_AI.md`) to perform based on its evaluation.
 
 ---
 
-## 2. Target Database & Memory
+## 2. Advanced Features
 
-Create a folder named `RV-Targets/` in the same directory as the script. Place your targets as `.md` or `.txt` files inside (one file = one target). 
-
-The script uses a log file (`rv_lite_sessions_log.jsonl`) to track your progress. It guarantees that **the active profile will never see the same target twice**. If you want to start fresh and replay targets, simply create a New Profile in the Main Menu.
-
-*(If you don't have targets, the script will provide a GitHub link to download a starter pack of 20 targets).*
+* **Independent Profiles:** The `rv_config.json` acts as an address book. It saves your API key, preferred model, and optimal temperature specifically for each profile name. You can seamlessly switch between different AIs without re-entering credentials.
+* **Connection Guard:** Includes a 3-try retry mechanism. If the OpenRouter server times out or drops the connection, the script will automatically pause and retry, protecting your automated batches from crashing.
+* **Strict Target Memory:** Guarantees that the active profile will never see the same target twice, utilizing the `rv_lite_sessions_log.jsonl` tracking file.
 
 ---
 
-## 3. Logs & Transcripts
+## 3. Target Database & Memory
 
-The script generates two types of records:
-1. **`rv_lite_sessions_log.jsonl`:** A lightweight metadata tracker that remembers which targets a profile has already completed.
-2. **`RV-Transcripts/` Folder:** If you opt-in, the script will generate a full `.txt` file for every session containing the entire conversation, steps, and ASCII drawings.
+Create a folder named `RV-Targets/` next to the script. Place your targets as `.md` or `.txt` files inside (one file = one target).
+
+If your folder is empty, the script will offer to automatically download a starter pack of 40 targets (from the location and activity categories) directly from the GitHub repository.
 
 ---
 
-## 4. Setup and Execution
+## 4. Logs & Transcripts
 
-### Requirements
-- Python 3.8+
-- `pip install openai requests`
-- An **OpenRouter API Key**
+* **`rv_lite_sessions_log.jsonl`:** A lightweight metadata tracker that remembers which targets a profile has already completed.
+* **`RV-Transcripts/` Folder:** If opted-in, generates a full `.txt` file for every session containing the entire conversation, steps, and ASCII drawings.
 
-### First-time Configuration
-You do **not** need to set up environment variables or edit the code. Simply open your terminal and run:
+---
 
-```bash
-python rv_lite_runner.py
-```
+## 5. Setup and Execution
 
-## 5. License & Disclaimer
+**Requirements:**
+* Python 3.8+
+* `pip install openai requests`
+* An OpenRouter API Key
+
+**Execution:**
+Open your terminal or PowerShell and run:
+`python rv_lite_runner.py`
+
+**The Main Menu:**
+The script acts as a continuous application with the following options:
+* **[C] CONTINUE:** Resumes the active profile, automatically picking a new, unseen target.
+* **[N] NEW PROFILE:** Starts a fresh target history. Prompts you to enter an API key, model, and temperature specifically for this new profile.
+* **[S] SETTINGS:** Allows you to update the API key, model, or temperature for the currently active profile.
+* **[Q] QUIT:** Exits the application safely.
+
+After making a choice, you can toggle the post-session exercises and set how many consecutive sessions you want to run. The script will automatically process the batch, wiping the AI's memory completely between each one!
+
+---
+
+## 6. License & Disclaimer
 
 This project, including the executable scripts and source code, is licensed under the **MIT License**.
 
