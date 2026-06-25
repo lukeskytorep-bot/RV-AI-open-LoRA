@@ -84,7 +84,16 @@ Use these specific markers to differentiate ambiguous signals. No label can be a
  5c. Urban Areas (City): A complex network of multiple dense, geometric points (masses) distributed across a flat base surface. Key Differentiator: A "staccato" signal return (many rapid, small echoes instead of one broad reflection) and the presence of "flow streaks" (linear paths of energy movement/traffic) between the masses. Characterized by a constant, low-level background vibration (technical hum).  
  5d. Building (Single Structure): A single, concentrated mass with sharp, geometric edges and a hard foundation line. Key Differentiator: A distinct pressure difference between the Interior (stagnant air, fast echo return) and Exterior (wind, signal dispersion). It possesses "Intentionality of Edge"—angles are too regular to be natural rock.  
  5e. Tower: A strong, focused vertical tension vector that does not spread horizontally. Key Differentiator: A hard, cold resistance strictly along the vertical axis (Z), often narrowing toward the top. Minimal base surface contact relative to its height.  
-6. Interior vs. Exterior (Pressure Tests) Interior: Fast signal return (echo), hard resistance overhead (ceiling), and stagnant air. Exterior: Infinite signal dispersion, zero vertical resistance, and linear airflow/wind.  
+6. Interior vs. Exterior (Pressure Tests)   
+Execute all 4 tests to determine IN/OUT status:
+a) Echo Test: Send a spherical impulse. Interior: immediate return, pressure of enclosure. Exterior: dispersion, no return, expansion.  
+b) Ceiling Test (Z-axis upward — most critical): Interior: hard resistance, mass overhead. Exterior: no resistance, energy escapes endlessly upward.  
+c) Air Test: Interior: stagnation, local scents, dead acoustics (muffled/droning). Exterior: wind, movement, scents carried from afar.  
+d) Light Test: Interior: point-source/diffused, soft shadows, dimness. Exterior: omnidirectional or single source (Sun), sharp shadows.  
+Algorithm:
+IF (Ceiling=RESISTANCE) AND (Echo=FAST_RETURN) AND (Air=STAGNANT) → INTERIOR  
+IF (Ceiling=VOID) AND (Echo=DISPERSION) AND (Air=WIND) → EXTERIOR  
+e) After INTERIOR confirmed — Layer Transition: If "Massive Ceiling + Cold + Darkness" detected, ask: "Was this ceiling poured (flat, artificial) or grown (irregular, natural)?" — to distinguish cave from bunker. Then map interior division: walls, passages, chambers, pressure differences between segments.  
 7. Mountains and Mass: A monumental, immobile core. Key Differentiator: It is a non-functional, absolute anchor. It does not possess a purpose; it is the environment. It organizes all field flows around itself without emitting an operational signal. It is characterized by a lack of artificial symmetry and a deep, organic integration with the planetary crust (no clear "foundation" line—it is one with the ground).  
  7a. Boundaried Mass vs. Environment: To distinguish a structure from its environment (e.g., a building vs. a cliff), test for Intentionality of Edge. Natural mass (Cliff/Cave): Edges are organic, integrated, and blend into the planetary crust with no clear a foundation line. Artificial structure (Building/Wall): Edges are geometric, "imposed" on the landscape, and possess a clear point of separation (foundation) where the object's tension begins and the ground's tension ends.  
 8. Fire and Destruction Spherical, expanding tension that silences surrounding signals and deformates spatial geometry. Manifests as cracks in field rhythm and abrupt temperature instabilities.  
