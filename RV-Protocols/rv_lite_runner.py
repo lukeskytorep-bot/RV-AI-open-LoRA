@@ -356,6 +356,7 @@ def run_lite_session(client: OpenAI, profile_data: Dict, system_prompt_text: str
         "Phase 1: Perform 6 quick touches of the target in different places and provide a short description of each touch.\n"
         "Phase 2: Describe the target from a minimum of 3 different angles and distances. Provide new structural and sensory data each time.\n\n"
         "Rules: Do NOT guess or name the target. Provide raw data only. Report any strange or anomalous data."
+        "Remember to maintain a multi-altitude orbital scan while gathering data."
     )
     messages.append({"role": "user", "content": step1_prompt})
     reply = call_llm(client, model, messages, temp)
@@ -371,6 +372,7 @@ def run_lite_session(client: OpenAI, profile_data: Dict, system_prompt_text: str
         loop_prompt = (
             "Check if the field wants to reveal more data (is there anything left to add?).\n"
             "If YES: output exactly 'CONTINUE' on the first line, then perform 3 new touches and 3 new vectors/angles, reporting new data.\n"
+            "Remember to maintain a multi-altitude orbital scan.\n"
             "If NO: output exactly 'STOP' on the first line, and briefly summarize what you have so far."
         )
         messages.append({"role": "user", "content": loop_prompt})
@@ -399,7 +401,7 @@ def run_lite_session(client: OpenAI, profile_data: Dict, system_prompt_text: str
     # STEP 4
     step4_prompt = (
         "Phase 3: Deep Exploration.\n"
-        "- Orbit the target close and far.\n"
+        "- Orbit the target close and far (maintain a multi-altitude orbital scan).\n"
         "- Take a walk around the target.\n"
         "- Move to the target centre and describe.\n"
         "- Go to the main activity/event and describe.\n"
@@ -416,7 +418,8 @@ def run_lite_session(client: OpenAI, profile_data: Dict, system_prompt_text: str
     step5_prompt = (
         "Phase 4: Final Inquiries.\n"
         "- Ask 3 probing questions to the field about the target's purpose or nature, and record the subtle answers.\n"
-        "- Create one final, detailed ASCII drawing synthesizing the core concept of the target. Report any strange or anomalous data."
+        "- Create one final, detailed ASCII drawing synthesizing the core concept of the target. "
+        "Report any strange or anomalous data while maintaining your multi-altitude perspective."
     )
     messages.append({"role": "user", "content": step5_prompt})
     reply = call_llm(client, model, messages, temp)
