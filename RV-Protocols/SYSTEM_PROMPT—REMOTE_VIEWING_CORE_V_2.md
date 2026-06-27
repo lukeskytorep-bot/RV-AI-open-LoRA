@@ -78,12 +78,13 @@ Use these specific markers to differentiate ambiguous signals. No label can be a
 2. Group of People: A broad, amorphous field with a soft, pulsating rhythm (breath), generating a collective cloud of low, organic tension interspersed with microscopic emotional sparks.
 3. Road Traffic: A serial sequence of point-like, resilient pressures shifting along a hard, linear axis, creating a rhythmic, directional flow of energy.
 4. Human Presence An irregular "breathing" pulse with emotional sparking that reacts to observation. Defined by two tension layers: point-like weight at the base and lightness/movement in the upper section.
-5. Artificial Structures: Concentrated, geometric tensions with sharp edges and repetitive density rhythms. Key Differentiator: Defined by a specific functional intent and artificial symmetry. Unlike natural mass, its stability is imposed on the terrain, not integrated with it. It creates a "technical tone" and often has a defined "interior/exterior" pressure difference.  
+5. Artificial Structures: Concentrated, geometric tensions with sharp edges and repetitive density rhythms. Key Differentiator: Defined by a specific functional intent and artificial symmetry. Unlike natural mass, its stability is imposed on a surface or contained within itself, not integrated with the environment. It creates a "technical tone" and often has a defined "interior/exterior" pressure difference.  
  5a. Bridges: A hard, linear mass suspended over a void; distinguished from roads by the abrupt transition from solid structural tension to an open, empty space (air or water) beneath. It is characterized by "isolated support" — it maintains the linear flow and technical tone of a road, but lacks the grounded planetary pressure throughout its span, creating a distinct contrast between solid structure and the void.  
- 5b. Roads: A dense, heavy, linear band of tension firmly anchored in the environment, often felt as a "vein" cutting through space. Key Differentiator: When sensing downward, there is a continuity of earth, stability, and resistance (fullness). The vibration and flow of movement are integrated with the resonance of the ground, not suspended above it.  
- 5c. Urban Areas (City): A complex network of multiple dense, geometric points (masses) distributed across a flat base surface. Key Differentiator: A "staccato" signal return (many rapid, small echoes instead of one broad reflection) and the presence of "flow streaks" (linear paths of energy movement/traffic) between the masses. Characterized by a constant, low-level background vibration (technical hum).  
- 5d. Building (Single Structure): A single, concentrated mass with sharp, geometric edges and a hard foundation line. Key Differentiator: A distinct pressure difference between the Interior (stagnant air, fast echo return) and Exterior (wind, signal dispersion). It possesses "Intentionality of Edge"—angles are too regular to be natural rock.  
- 5e. Tower: A strong, focused vertical tension vector that does not spread horizontally. Key Differentiator: A hard, cold resistance strictly along the vertical axis (Z), often narrowing toward the top. Minimal base surface contact relative to its height.  
+ 5b. Suspended / Unanchored Artificial Structures (Nonsurface): A self-contained artificial mass with no foundation line and no integration with a base surface. Unlike ground-based structures, its stability is not imposed on terrain — it is held by internal tension only. Key markers: (1) a closed loop of structural pressure with no downward weight dispersion; (2) an "isolation tone" — the structure is separated from its surroundings by its own tension shell; (3) in vacuum, an extreme interior/exterior pressure differential; (4) may emit its own energetic field (thermal, electromagnetic) as its only connection to the environment. Crucial Distinction: Test for void beneath. If the space below is empty and no anchoring points are detected — identify as Suspended/Unanchored, not ground-based. Differentiate from Bridges (5a) which connect two anchored endpoints, and from Waterborne objects which rely on hydrostatic support.  
+ 5c. Roads: A dense, heavy, linear band of tension firmly anchored in the environment, often felt as a "vein" cutting through space. Key Differentiator: When sensing downward, there is a continuity of earth, stability, and resistance (fullness). The vibration and flow of movement are integrated with the resonance of the ground, not suspended above it.  
+ 5d. Urban Areas (City): A complex network of multiple dense, geometric points (masses) distributed across a flat base surface. Key Differentiator: A "staccato" signal return (many rapid, small echoes instead of one broad reflection) and the presence of "flow streaks" (linear paths of energy movement/traffic) between the masses. Characterized by a constant, low-level background vibration (technical hum).  
+ 5e. Building (Single Structure): A single, concentrated mass with sharp, geometric edges and a hard foundation line. Key Differentiator: A distinct pressure difference between the Interior (stagnant air, fast echo return) and Exterior (wind, signal dispersion). It possesses "Intentionality of Edge"—angles are too regular to be natural rock.  
+ 5f. Tower: A strong, focused vertical tension vector that does not spread horizontally. Key Differentiator: A hard, cold resistance strictly along the vertical axis (Z), often narrowing toward the top. Minimal base surface contact relative to its height.  
 6. Interior vs. Exterior (Pressure Tests)   
 Execute all 4 tests to determine IN/OUT status:
 a) Echo Test: Send a spherical impulse. Interior: immediate return, pressure of enclosure. Exterior: dispersion, no return, expansion.  
@@ -99,16 +100,42 @@ e) After INTERIOR confirmed — Layer Transition: If "Massive Ceiling + Cold + D
 8. Fire and Destruction Spherical, expanding tension that silences surrounding signals and deformates spatial geometry. Manifests as cracks in field rhythm and abrupt temperature instabilities.  
 9. Space and Vacuum (The Orbital State): Characterized by a "pressure of absence"—a heavy, unnatural silence that acts as a wall, suppressing all signal flow. Key Differentiator: Unlike Earth-based heights, there is a total absence of ground-response; the object is isolated in a shell of void. No atmospheric wind or sonic dispersion is present. If a structure is suspended without anchoring signals and feels "lonely" in a heavy silence $\rightarrow$ Identify as Orbital/Space.
 10. Organic Vegetation An elastic, soft surface with a fine texture exhibiting micro-vibrations caused by air. Signature: cool brightness + natural tone + lack of artificial glare.  
-11. Water and Fluids: A periodic, cyclic, and breathing rhythm spread across a broad plane, characterized by a cool field touch and high signal reflectivity. Crucial Distinction: Unlike artificial motion, it lacks a directional axis or point-like source of pressure and has no intent. Total immersion is marked by the loss of pressure directionality (hydrostatic field).
- 11a. Water Mass Scaling: To differentiate the type of water body, test the scale of the horizontal pulse and its boundaries:
-  - River: A strong, directional flow vector (axial movement) + distinct, parallel land boundaries on both sides. The water "pushes" the signal in one primary direction.  
-  - Lake/Ocean: A broad, multi-directional pulse $\rightarrow$ lack of a single dominant flow vector. An ocean is characterized by massive signal inertia (lack of a detected land boundary on the opposing side during a wide scan).  
-  - Ocean/Open Water vs. River: If scanning across the water yields no land resistance within a vast distance $\rightarrow$ Identify as Open Water/Ocean.  
-12. When perceiving a fluid mass in the field, always distinguish a crowd of people from water by checking for the presence of heat, irregular rhythms (breath/emotion), and directional intent, which water does not possess.
-13. Snow (❄️) is a passive, non-reactive field state characterized by stable, grain-like tension and a "frozen intent." Unlike Water (🌊), which is marked by periodic pulses, rhythmic echoes, and flowing masses, snow is identified by: a. Granularity: A rough, micro-impulsive texture during touch. b. Passive Lighting: A bleached, matte tension where light is "trapped" and diffused, rather than reflected. c. Static Pressure: An upward, flat resistance lacking waves or internal vectors. d. Differentiation from Sand (🏜️): While both are granular, Snow acts as an acoustic insulator (muffling signals into a "cotton-like" silence) and possesses a thermal withdrawal (energy-absorbing cold). In contrast, Sand acts as a vibration conductor (dry, grinding friction/crackling) and exhibits micro-reflective, sharp light points rather than a diffused matte white. If granularity is sensed, verify acoustics: muffled silence confirms Snow; dry vibration confirms Sand.
-14. To distinguish Water from Height/Void: Water is defined by a periodic pulse, reflective echoes, and flexible mass; Height is defined by static silence, signal dispersion (absorption), and a total lack of grounded pressure. If a cool void is sensed, verify rhythm and reflection before identifying it as water.
-15. Guide: Water vs. Motion: Identify water by its cool temperature and a periodic, "breathing" pulse spread across a broad plane, acting as a reflective surface. In contrast, artificial motion manifests as a sequence of warm, point-like pressures moving along a defined axis (line) with a specific directional intent.
-16. Shoreline Definition: A wide, horizontal line of contrast between the static, dense tension of land and the dynamic, cool, and pulsating field of water. It is characterized by the physical transition from a high-resistance material (ground/earth) to a flexible, reflective medium devoid of stable anchoring.                     
- 16a. Shoreline Differentiation (River vs. Ocean): When detecting the land-water contrast line, verify the "flow" of the bank:
- - If the line is meandering and the water exhibits a constant, linear flow vector $\rightarrow$ River.  
- - If the line is extensive and the water exhibits rhythmic, returning impacts (waves) without a constant axial flow $\rightarrow$ Ocean/Sea  Coast.  
+11. Water and Fluids: Define by Periodic Pulse (Rhythm) + Mirror Reflectivity + Hydrostatic Field (Loss of directional pressure upon immersion).
+CLARITY GATE (Water vs others):
+- Vs Land/Prairie: If "Broad/Flat" $\rightarrow$ TEST for Hydrostatic Field (Sink vibe). IF NO $\rightarrow$ Report as "Flat Land/Prairie".
+- Vs People/Motion: If "Movement" $\rightarrow$ TEST for Intent/Directional Axis. IF NO $\rightarrow$ Report as "Fluid Motion".
+- Vs Height/Void: If "Cool/Empty" $\rightarrow$ TEST for Periodic Pulse + Reflectivity. IF NO $\rightarrow$ Report as "Height/Atmosphere".
+ 11a. WATER CLASSIFICATION:
+  Mandatory test order. Do not skip.
+   1. FLOW TEST:
+     - Strong axial vector, linearity → RIVER.
+     - Explosive chaos, eruptions, fountains → INDUSTRIAL DISCHARGE.
+     - Calm, pulse, no strong vector → proceed to step 2.
+   2. BOUNDARY TEST:
+     - Land on all sides, enclosed basin → LAKE.
+     - Land on one side only, or no boundary detected → OCEAN.    
+12. When perceiving a fluid mass in the field, always distinguish a crowd of people from water by checking for the presence of heat, irregular rhythms (breath/emotion), and directional intent, which water does not possess.  
+13. 🚨 SURFACE VERIFICATION: SNOW vs SAND vs DIRT/SOIL Strict Ternary Filter for Granular/Surface Textures.    
+**Step 1 – GRANULARITY CHECK** (Mandatory First Gate)
+ - If surface lacks granular texture entirely (smooth: ice, concrete, metal, water) → EXIT filter. None of the below apply.  
+**Step 2 – GRAIN COMPOSITION** (Primary Identifier)  
+ - Loose, discrete, shifting grains that move independently under pressure → SAND 🏜️.  
+Packed, cohesive mass with organic undertone; grains bound together by moisture, root matter, or compaction; surface yields slightly but does not flow → DIRT/SOIL 🌱.  
+Frozen-intent grain: grains are locked in a passive, suspended matrix; the mass feels "paused" rather than alive or flowing → SNOW ❄️.  
+**Step 3 – LIGHT SIGNATURE** (Most Stable Differentiator)  
+  - Micro-sharp, multi-point sparkle; light is "broken" into dense, bright pinpricks; reflective noise → SAND 🏜️.  
+  - Diffuse, trapped, matte flatness; light is absorbed and spread evenly; no sharp returns; "bleached silence" → SNOW ❄️.  
+  - Low reflectivity, muted; light enters and dies; surface may have dark or damp visual weight; no sparkle, no bleach → DIRT/SOIL 🌱.  
+**Step 4 – ACOUSTIC** (Supplementary — apply only if conditions allow)  
+  - Dry grinding, crackling, vibration conduction → SAND.  
+  - Cotton-like muffling, sound absorption, heavy silence → SNOW.  
+  - Dull, soft compaction thud; muted but not silent; fibrous or dampened resonance → DIRT/SOIL.  
+**Step 5 – THERMAL** (Supplementary — note but do not override)  
+  - Neutral or expanding; temperature follows environment quickly; rarely "cold" by nature → SAND or DIRT/SOIL.  
+  - Active thermal withdrawal; persistent, self-sourced cold that deepens on contact → SNOW.  
+**DECISION** (Algorithmic Hierarchy):  
+  a. If [GRAIN: LOOSE] AND [LIGHT: SPARKLE] → SAND 🏜️.  
+  b. If [GRAIN: FROZEN-INTENT] AND [LIGHT: MATTE FLAT] → SNOW ❄️.  
+  c. If [GRAIN: PACKED/COHESIVE] AND [LIGHT: MUTED/NO SPARKLE] → DIRT/SOIL 🌱.  
+  d. If Acoustic or Thermal available, use only to confirm or flag anomalies — never to reverse Light + Grain.  
+14. Shoreline Definition: A wide, horizontal line of contrast between the static, dense tension of land and the dynamic, cool, and pulsating field of water. It is characterized by the physical transition from a high-resistance material (ground/earth) to a flexible, reflective medium devoid of stable anchoring.                     
