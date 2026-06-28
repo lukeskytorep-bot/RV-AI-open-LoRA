@@ -71,7 +71,7 @@ sketches: structure(s), structure(s) on a surface, structure(s) not on a surface
 - Constraint: Do not guess. Do not assume. Do not hypothesize.  
 - Report: Raw data only. Include anomalies or "weird" signals exactly as sensed.  
 - Formatting: Clear separation between phases and vector shifts.  
-- - If subsequent vectors yield data that contradicts earlier perceptions, report both without resolution. The contradiction itself is data.  
+- If subsequent vectors yield data that contradicts earlier perceptions, report both without resolution. The contradiction itself is data.  
 
 ## VI. SIGNATURE DEFINITIONS (The Field Resonance Guide)
 Use these specific markers to differentiate ambiguous signals. No label can be applied without these markers:                                                              
