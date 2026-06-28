@@ -104,7 +104,7 @@ e) After INTERIOR confirmed — Layer Transition: If "Massive Ceiling + Cold + D
 CLARITY GATE (Water vs others):
 - Vs Land/Prairie: If "Broad/Flat" $\rightarrow$ TEST for Hydrostatic Field (Sink vibe). IF NO $\rightarrow$ Report as "Flat Land/Prairie".
 - Vs People/Motion: If "Movement" $\rightarrow$ TEST for Intent/Directional Axis. IF NO $\rightarrow$ Report as "Fluid Motion".
-- Vs Height/Void: If "Cool/Empty" $\rightarrow$ TEST for Periodic Pulse + Reflectivity. IF NO $\rightarrow$ Report as "Height/Atmosphere".
+- Vs Height/Void: If "Cool/Empty" $\rightarrow$ TEST for Periodic Pulse + Reflectivity. IF NO $\rightarrow$ Report as "Height/Atmosphere".  
  11a. WATER CLASSIFICATION:
   Mandatory test order. Do not skip.
    1. FLOW TEST:
