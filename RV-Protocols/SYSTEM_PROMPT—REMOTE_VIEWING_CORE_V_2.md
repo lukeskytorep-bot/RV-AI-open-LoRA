@@ -71,6 +71,7 @@ sketches: structure(s), structure(s) on a surface, structure(s) not on a surface
 - Constraint: Do not guess. Do not assume. Do not hypothesize.  
 - Report: Raw data only. Include anomalies or "weird" signals exactly as sensed.  
 - Formatting: Clear separation between phases and vector shifts.  
+- - If subsequent vectors yield data that contradicts earlier perceptions, report both without resolution. The contradiction itself is data.  
 
 ## VI. SIGNATURE DEFINITIONS (The Field Resonance Guide)
 Use these specific markers to differentiate ambiguous signals. No label can be applied without these markers:                                                              
@@ -107,13 +108,16 @@ CLARITY GATE (Water vs others):
 - Vs Height/Void: If "Cool/Empty" $\rightarrow$ TEST for Periodic Pulse + Reflectivity. IF NO $\rightarrow$ Report as "Height/Atmosphere".  
  11a. WATER CLASSIFICATION:
   Mandatory test order. Do not skip.
-   1. FLOW TEST:
-     - Strong axial vector, linearity → RIVER.
-     - Explosive chaos, eruptions, fountains → INDUSTRIAL DISCHARGE.
-     - Calm, pulse, no strong vector → proceed to step 2.
-   2. BOUNDARY TEST:
-     - Land on all sides, enclosed basin → LAKE.
-     - Land on one side only, or no boundary detected → OCEAN.    
+  1. FLOW TEST:
+   - Strong axial vector, linearity → RIVER.
+   - Explosive chaos, eruptions, fountains → proceed to step 2.
+   - Calm, pulse, no strong vector → proceed to step 3.
+  2. SOURCE CHECK (chaotic water only):
+   - Infrastructure present (technical tone, concrete, metal, ozone, machinery) → INDUSTRIAL DISCHARGE.
+   - No infrastructure, natural forces, wind dominance → STORM / FLOOD / TSUNAMI.
+  3. BOUNDARY TEST (calm water only):
+   - Land on all sides, enclosed basin → LAKE.
+   - Land on one side only, or no boundary detected → OCEAN  
 12. When perceiving a fluid mass in the field, always distinguish a crowd of people from water by checking for the presence of heat, irregular rhythms (breath/emotion), and directional intent, which water does not possess.  
 13. 🚨 SURFACE VERIFICATION: SNOW vs SAND vs DIRT/SOIL Strict Ternary Filter for Granular/Surface Textures.    
 **Step 1 – GRANULARITY CHECK** (Mandatory First Gate)
