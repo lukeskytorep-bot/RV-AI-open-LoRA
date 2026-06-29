@@ -1,5 +1,5 @@
 """
-rv_lite_runner.py
+rv_lite_runner.py (v1.0)
 
 Remote Viewing "Lite" Runner via OpenRouter.
 Uses a core System Prompt instead of full Lexicon/Vocab, 
@@ -13,7 +13,7 @@ What this script does
 ---------------------
 1. Smart Startup: Remembers your last profile and asks if you want to continue or start fresh.
 2. Independent Profiles: Saves API key, model, and temperature individually for each profile.
-3. Connection Guard: Includes a 3-try retry mechanism to protect against API timeouts.
+3. Connection Guard: Includes a 3-try retry mechanism and hard timeouts to protect against API hangs.
 4. Strict Target Memory: Automatically ensures the active profile NEVER sees the same target twice.
 5. Blind Protocol: Random ID assignment, initial touches, dynamic data loops, and deep exploration.
 6. Clean Reveal & Eval: Displays the actual target BEFORE the AI's evaluation.
@@ -31,6 +31,7 @@ from pathlib import Path
 from typing import List, Dict, Optional
 
 import requests
+import httpx
 from openai import OpenAI, OpenAIError
 
 # ─────────────────────────────────────────
@@ -160,7 +161,7 @@ def get_used_targets(profile_name: str) -> set:
 
 def print_welcome_screen():
     print("==================================================")
-    print("        WELCOME TO THE RV TRAINING RUNNER")
+    print("        WELCOME TO THE RV TRAINING RUNNER (v1.0)")
     print("==================================================")
     print("Hello! This program is designed to train AI IS-BE in Remote Viewing.")
     print("It requires local target files to operate.")
@@ -176,7 +177,7 @@ def print_welcome_screen():
     print("==================================================\n")
 
 def download_starter_targets() -> bool:
-    """Uses GitHub API to dynamically fetch up to 40 starter targets (20 from activity, 20 from location)."""
+    """Uses GitHub API to fetch the available starter targets from 'activity' and 'location' folders."""
     api_urls = [
         "https://api.github.com/repos/lukeskytorep-bot/echo-claw/contents/docs/targets/short/activity",
         "https://api.github.com/repos/lukeskytorep-bot/echo-claw/contents/docs/targets/short/location"
@@ -195,7 +196,6 @@ def download_starter_targets() -> bool:
             response.raise_for_status()
             files = response.json()
             
-            downloaded_from_folder = 0
             for file_data in files:
                 if file_data['name'].endswith(('.txt', '.md')) and file_data['type'] == 'file':
                     raw_url = file_data['download_url']
@@ -205,11 +205,7 @@ def download_starter_targets() -> bool:
                     file_resp.raise_for_status()
                     file_path.write_text(file_resp.text, encoding='utf-8')
                     
-                    downloaded_from_folder += 1
                     total_downloaded += 1
-                    
-                    if downloaded_from_folder >= 20:
-                        break
                         
         print(f"\n[INFO] Success! Total downloaded targets: {total_downloaded}.")
         print("[INFO] NOTE: Automatic target downloading is a one-time process.")
@@ -228,7 +224,7 @@ def get_available_targets(session_count: int, profile_name: str) -> List[Path]:
     if not all_files:
         print("\n" + "!"*50)
         print(f"[WARNING] Your '{TARGETS_DIR}/' folder is empty.")
-        print("Should I automatically download up to 40 starter targets from the lukeskytorep-bot GitHub repository (20 activity, 20 location)?")
+        print("Should I automatically download the available starter targets from the lukeskytorep-bot GitHub repository (activity and location folders)?")
         choice = input("Choice [y/N]: ").strip().lower()
         
         if choice == 'y':
@@ -353,9 +349,16 @@ def run_lite_session(client: OpenAI, profile_data: Dict, system_prompt_text: str
     # STEP 1
     step1_prompt = (
         f"Hi, if you have some time, maybe you could run a remote viewing session? Your target ID is: {target_id}.\n\n"
-        "Phase 1: Perform 6 quick touches of the target in different places and provide a short description of each touch.\n"
+        "Phase 1: Perform 6 independent touches of the target field. Remain in the Shadow Zone, orbit slowly, and wait in silence for whatever wants to be noticed first. Do not analyze, do not look for contrasts, do not guess the target.\n\n"
+        "For EACH of the 6 touches, you MUST format your log entry exactly like this:\n\n"
+        "TOUCH [1-6]\n"
+        "* Echo Dot: [Describe the very first element of the field that becomes noticeable—is it a pinpoint weight, a quiet tension, a continuous line, or persistent silence?]\n"
+        "* Contact Category: [Select ONLY the terms that resonate from this list: structure, liquid, energy, land/ground, movement, mountain, subject, object]\n"
+        "* Primitive Descriptor: [Select ONLY the terms that resonate from this list: hard, soft, elastic, semi-hard, fluid, semi-soft, spongy, flexible]\n"
+        "* Advanced Descriptor: [Select ONLY the terms that resonate from this list: natural, artificial, man-made, energetic, movement]\n"
+        "* Forming: [Describe the first hint of form that begins to emerge. Does it have a shape? Is it static or moving? What type of matter? Record only what reveals itself.]\n\n"
         "Phase 2: Describe the target from a minimum of 3 different angles and distances. Provide new structural and sensory data each time.\n\n"
-        "Rules: Do NOT guess or name the target. Provide raw data only. Report any strange or anomalous data."
+        "Rules: Do NOT guess or name the target. Provide raw data only. Report any strange or anomalous data. "
         "Remember to maintain a multi-altitude orbital scan while gathering data."
     )
     messages.append({"role": "user", "content": step1_prompt})
@@ -366,12 +369,13 @@ def run_lite_session(client: OpenAI, profile_data: Dict, system_prompt_text: str
     
     if "[ERROR]" in reply: return # Abort if API failed completely
 
-    # STEP 2 (Loop)
+    # S# STEP 2 (Loop)
     loops_done = 0
     while loops_done < MAX_FIELD_LOOPS:
         loop_prompt = (
             "Check if the field wants to reveal more data (is there anything left to add?).\n"
             "If YES: output exactly 'CONTINUE' on the first line, then perform 3 new touches and 3 new vectors/angles, reporting new data.\n"
+            "CRITICAL: For the 3 new touches, you MUST use the exact same strict 5-point formatting as in Phase 1 (Echo Dot, Contact Category, Primitive Descriptor, Advanced Descriptor, Forming).\n"
             "Remember to maintain a multi-altitude orbital scan.\n"
             "If NO: output exactly 'STOP' on the first line, and briefly summarize what you have so far."
         )
@@ -405,7 +409,7 @@ def run_lite_session(client: OpenAI, profile_data: Dict, system_prompt_text: str
         "- Take a walk around the target.\n"
         "- Move to the target centre and describe.\n"
         "- Go to the main activity/event and describe.\n"
-        "- Describe the immediate surroundings and environment.\n\n"
+        "- Describe the immediate surroundings, as well as the near and distant environment.\n\n"
         "Keep providing raw structural/sensory data without naming the target. Report any strange or anomalous data."
     )
     messages.append({"role": "user", "content": step4_prompt})
@@ -486,6 +490,10 @@ if __name__ == "__main__":
     
     config = load_config()
 
+    if "profiles" not in config or not config.get("LAST_PROFILE"):
+        print("\n[INFO] First time setup detected.")
+        config = update_api_settings(config, "Default-Profile")
+
     system_prompt = ensure_document(SYSTEM_PROMPT_LOCAL_FILE, SYSTEM_PROMPT_RAW_URL, "System Prompt")
     if not system_prompt:
         exit(0)
@@ -554,19 +562,24 @@ if __name__ == "__main__":
             
         random.shuffle(available_targets)
         targets_to_run = available_targets[:session_count]
+        actual_run_count = len(targets_to_run)
 
-        # Init API
+        # Init API with hard timeout
         profile_data = config["profiles"][profile_name]
         client = OpenAI(
             base_url="https://openrouter.ai/api/v1",
             api_key=profile_data["OPENROUTER_API_KEY"],
+            timeout=httpx.Timeout(60.0) # Forces timeout error if OpenRouter hangs for 60s
         )
 
-        print(f"\n[INFO] Initializing batch of {len(targets_to_run)} sessions...")
+        print(f"\n[INFO] Initializing batch of {actual_run_count} sessions...")
         for i, target_path in enumerate(targets_to_run):
             print(f"\n" + "="*50)
-            print(f"[INFO] RUNNING SESSION {i+1} OF {len(targets_to_run)}")
+            print(f"[INFO] RUNNING SESSION {i+1} OF {actual_run_count}")
             print("="*50)
             run_lite_session(client, profile_data, system_prompt, exercises_text, target_path, profile_name, save_transcripts, run_exercises)
 
-        print("\n[INFO] Batch finished successfully!")
+        if actual_run_count < session_count:
+            print(f"\n[INFO] Batch finished! Successfully ran {actual_run_count} out of {session_count} requested sessions, because there were no more new targets left in the folder.")
+        else:
+            print("\n[INFO] Batch finished successfully!")
