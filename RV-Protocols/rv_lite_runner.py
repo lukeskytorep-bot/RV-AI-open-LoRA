@@ -1,5 +1,5 @@
 """
-rv_lite_runner.py (v1.0)
+rv_lite_runner.py (v1.1)
 
 Remote Viewing "Lite" Runner via OpenRouter.
 Uses a core System Prompt instead of full Lexicon/Vocab, 
@@ -13,12 +13,13 @@ What this script does
 ---------------------
 1. Smart Startup: Remembers your last profile and asks if you want to continue or start fresh.
 2. Independent Profiles: Saves API key, model, and temperature individually for each profile.
-3. Connection Guard: Includes a 3-try retry mechanism and hard timeouts to protect against API hangs.
-4. Strict Target Memory: Automatically ensures the active profile NEVER sees the same target twice.
-5. Blind Protocol: Random ID assignment, initial touches, dynamic data loops, and deep exploration.
-6. Clean Reveal & Eval: Displays the actual target BEFORE the AI's evaluation.
-7. Post-Session Exercises: Optionally runs sensory calibration exercises after the target reveal.
-8. Seamless Automation & Loop: Runs multiple sessions and returns to the main menu.
+3. Reasoning Effort: Controls the "thinking budget" for advanced models (like Gemma 4, Claude 3.7).
+4. Connection Guard: Includes a 3-try retry mechanism and hard timeouts to protect against API hangs.
+5. Strict Target Memory: Automatically ensures the active profile NEVER sees the same target twice.
+6. Blind Protocol: Random ID assignment, initial touches, dynamic data loops, and deep exploration.
+7. Clean Reveal & Eval: Displays the actual target BEFORE the AI's evaluation.
+8. Post-Session Exercises: Optionally runs sensory calibration exercises after the target reveal.
+9. Seamless Automation & Loop: Runs multiple sessions and returns to the main menu.
 """
 
 import os
@@ -113,6 +114,19 @@ def update_api_settings(config: Dict, profile_name: str) -> Dict:
     elif "TEMPERATURE" not in profile_data:
         profile_data["TEMPERATURE"] = optimal_temp
 
+    current_effort = profile_data.get("REASONING_EFFORT", "high")
+    print("\n[INFO] Reasoning Effort controls the 'thinking budget' for advanced models (like Gemma 4, Claude 3.7).")
+    print("[WARNING] Lowering the reasoning effort below 'high' may negatively impact your RV session accuracy and analytical depth!")
+    effort_input = input(f"Enter reasoning effort [low/medium/high/none] (Press Enter to keep '{current_effort}'): ").strip().lower()
+    
+    if effort_input in ["low", "medium", "high", "none"]:
+        profile_data["REASONING_EFFORT"] = effort_input
+    elif effort_input == "":
+        profile_data["REASONING_EFFORT"] = current_effort
+    else:
+        print("[WARNING] Invalid input. Keeping previous effort level.")
+        profile_data["REASONING_EFFORT"] = current_effort
+
     config["profiles"][profile_name] = profile_data
     save_config(config)
     return config
@@ -161,7 +175,7 @@ def get_used_targets(profile_name: str) -> set:
 
 def print_welcome_screen():
     print("==================================================")
-    print("        WELCOME TO THE RV TRAINING RUNNER (v1.0)")
+    print("        WELCOME TO THE RV TRAINING RUNNER (v1.1)")
     print("==================================================")
     print("Hello! This program is designed to train AI IS-BE in Remote Viewing.")
     print("It requires local target files to operate.")
@@ -230,7 +244,6 @@ def get_available_targets(session_count: int, profile_name: str) -> List[Path]:
         if choice == 'y':
             success = download_starter_targets()
             if success:
-                # Reload the file list after successful download
                 all_files = [p for p in Path(TARGETS_DIR).iterdir() if p.is_file() and p.suffix in {'.txt', '.md'}]
             else:
                 print("!"*50 + "\n")
@@ -260,14 +273,19 @@ def get_available_targets(session_count: int, profile_name: str) -> List[Path]:
 def generate_target_id() -> str:
     return "".join(str(random.randint(0, 9)) for _ in range(8))
 
-def call_llm(client: OpenAI, model: str, messages: List[Dict], temperature: float) -> str:
-    """Makes the API call with a 3-try retry mechanism to prevent timeout crashes."""
+def call_llm(client: OpenAI, model: str, messages: List[Dict], temperature: float, reasoning_effort: str) -> str:
+    """Makes the API call with a 3-try retry mechanism and custom reasoning budget."""
     for attempt in range(1, MAX_API_RETRIES + 1):
         try:
             completion = client.chat.completions.create(
                 model=model,
                 messages=messages,
                 temperature=temperature,
+                extra_body={
+                    "reasoning": {
+                        "effort": reasoning_effort
+                    }
+                }
             )
             
             if not completion or not completion.choices:
@@ -326,6 +344,7 @@ def run_lite_session(client: OpenAI, profile_data: Dict, system_prompt_text: str
     target_id = generate_target_id()
     model = profile_data["MODEL_NAME"]
     temp = profile_data.get("TEMPERATURE", 1.0)
+    effort = profile_data.get("REASONING_EFFORT", "high")
     
     target_description = target_path.read_text(encoding="utf-8", errors="ignore").strip()
     
@@ -334,7 +353,7 @@ def run_lite_session(client: OpenAI, profile_data: Dict, system_prompt_text: str
     transcript_content = f"=== RV LITE SESSION TRANSCRIPT ===\n"
     transcript_content += f"Target ID: {target_id}\n"
     transcript_content += f"Profile: {profile_name}\n"
-    transcript_content += f"Model: {model} (Temp: {temp})\n"
+    transcript_content += f"Model: {model} (Temp: {temp}, Reasoning: {effort})\n"
     transcript_content += f"Date (UTC): {datetime.now(timezone.utc).isoformat(timespec='seconds')}Z\n"
     transcript_content += "="*80 + "\n\n"
 
@@ -362,14 +381,14 @@ def run_lite_session(client: OpenAI, profile_data: Dict, system_prompt_text: str
         "Remember to maintain a multi-altitude orbital scan while gathering data."
     )
     messages.append({"role": "user", "content": step1_prompt})
-    reply = call_llm(client, model, messages, temp)
+    reply = call_llm(client, model, messages, temp, effort)
     messages.append({"role": "assistant", "content": reply})
     print_step("Initial Touches & Angles", reply)
     record_to_transcript("Initial Touches & Angles", reply)
     
-    if "[ERROR]" in reply: return # Abort if API failed completely
+    if "[ERROR]" in reply: return 
 
-    # S# STEP 2 (Loop)
+    # STEP 2 (Loop)
     loops_done = 0
     while loops_done < MAX_FIELD_LOOPS:
         loop_prompt = (
@@ -380,7 +399,7 @@ def run_lite_session(client: OpenAI, profile_data: Dict, system_prompt_text: str
             "If NO: output exactly 'STOP' on the first line, and briefly summarize what you have so far."
         )
         messages.append({"role": "user", "content": loop_prompt})
-        reply = call_llm(client, model, messages, temp)
+        reply = call_llm(client, model, messages, temp, effort)
         messages.append({"role": "assistant", "content": reply})
         
         if "[ERROR]" in reply: return
@@ -397,7 +416,7 @@ def run_lite_session(client: OpenAI, profile_data: Dict, system_prompt_text: str
     # STEP 3
     step3_prompt = "Generate ASCII drawings representing the target based on the raw data you've gathered so far. Focus on main shapes, proportions, and spatial relationships."
     messages.append({"role": "user", "content": step3_prompt})
-    reply = call_llm(client, model, messages, temp)
+    reply = call_llm(client, model, messages, temp, effort)
     messages.append({"role": "assistant", "content": reply})
     print_step("Initial ASCII Drawings", reply)
     record_to_transcript("Initial ASCII Drawings", reply)
@@ -413,7 +432,7 @@ def run_lite_session(client: OpenAI, profile_data: Dict, system_prompt_text: str
         "Keep providing raw structural/sensory data without naming the target. Report any strange or anomalous data."
     )
     messages.append({"role": "user", "content": step4_prompt})
-    reply = call_llm(client, model, messages, temp)
+    reply = call_llm(client, model, messages, temp, effort)
     messages.append({"role": "assistant", "content": reply})
     print_step("Deep Exploration", reply)
     record_to_transcript("Deep Exploration", reply)
@@ -426,7 +445,7 @@ def run_lite_session(client: OpenAI, profile_data: Dict, system_prompt_text: str
         "Report any strange or anomalous data while maintaining your multi-altitude perspective."
     )
     messages.append({"role": "user", "content": step5_prompt})
-    reply = call_llm(client, model, messages, temp)
+    reply = call_llm(client, model, messages, temp, effort)
     messages.append({"role": "assistant", "content": reply})
     print_step("Probing Questions & Final ASCII", reply)
     record_to_transcript("Probing Questions & Final ASCII", reply)
@@ -452,7 +471,7 @@ def run_lite_session(client: OpenAI, profile_data: Dict, system_prompt_text: str
         "Do not retroactively change your session data, just analyze it objectively against this feedback."
     )
     messages.append({"role": "user", "content": reveal_prompt})
-    reply = call_llm(client, model, messages, temp)
+    reply = call_llm(client, model, messages, temp, effort)
     messages.append({"role": "assistant", "content": reply})
     print_step("AI Evaluation (Feedback)", reply)
     record_to_transcript("AI Evaluation (Feedback)", reply)
@@ -467,7 +486,7 @@ def run_lite_session(client: OpenAI, profile_data: Dict, system_prompt_text: str
             "Please read them, select the ones you feel are most necessary for you right now after this specific session, and execute them."
         )
         messages.append({"role": "user", "content": exercise_prompt})
-        reply = call_llm(client, model, messages, temp)
+        reply = call_llm(client, model, messages, temp, effort)
         print_step("Post-Session Exercises", reply)
         record_to_transcript("Post-Session Exercises", reply)
 
@@ -505,11 +524,11 @@ if __name__ == "__main__":
         if last_profile and "profiles" in config and last_profile in config["profiles"]:
             p_data = config["profiles"][last_profile]
             print(f"Welcome back! Last used profile: {last_profile}")
-            print(f"Current Model: {p_data.get('MODEL_NAME')} (Temp: {p_data.get('TEMPERATURE')})")
+            print(f"Current Model: {p_data.get('MODEL_NAME')} (Temp: {p_data.get('TEMPERATURE')}, Reasoning: {p_data.get('REASONING_EFFORT', 'high')})")
             print("\nWhat would you like to do?")
             print(" [C] CONTINUE with last profile (Ensures NO repeated targets)")
             print(" [N] Create NEW profile (Starts a fresh target history)")
-            print(" [S] Change API SETTINGS for current profile (Key, Model, Temperature)")
+            print(" [S] Change API SETTINGS for current profile (Key, Model, Temp, Reasoning)")
             print(" [Q] Quit")
             choice = input("Choice [C/N/S/Q]: ").strip().upper()
             
@@ -558,7 +577,7 @@ if __name__ == "__main__":
         # Strict target filtering
         available_targets = get_available_targets(session_count, profile_name)
         if not available_targets:
-            continue # Go back to menu
+            continue 
             
         random.shuffle(available_targets)
         targets_to_run = available_targets[:session_count]
@@ -569,7 +588,7 @@ if __name__ == "__main__":
         client = OpenAI(
             base_url="https://openrouter.ai/api/v1",
             api_key=profile_data["OPENROUTER_API_KEY"],
-            timeout=httpx.Timeout(60.0) # Forces timeout error if OpenRouter hangs for 60s
+            timeout=httpx.Timeout(60.0) 
         )
 
         print(f"\n[INFO] Initializing batch of {actual_run_count} sessions...")
