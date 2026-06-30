@@ -13,7 +13,7 @@ What this script does
 ---------------------
 1. Smart Startup: Remembers your last profile and asks if you want to continue or start fresh.
 2. Independent Profiles: Saves API key, model, and temperature individually for each profile.
-3. Reasoning Effort: Controls the "thinking budget" for advanced models (like Gemma 4, Claude 3.7).
+3. Reasoning Effort: Controls the "thinking budget" for advanced models (like Gemma 4).
 4. Connection Guard: Includes a 3-try retry mechanism and hard timeouts to protect against API hangs.
 5. Strict Target Memory: Automatically ensures the active profile NEVER sees the same target twice.
 6. Blind Protocol: Random ID assignment, initial touches, dynamic data loops, and deep exploration.
@@ -115,7 +115,7 @@ def update_api_settings(config: Dict, profile_name: str) -> Dict:
         profile_data["TEMPERATURE"] = optimal_temp
 
     current_effort = profile_data.get("REASONING_EFFORT", "high")
-    print("\n[INFO] Reasoning Effort controls the 'thinking budget' for advanced models (like Gemma 4, Claude 3.7).")
+    print("\n[INFO] Reasoning Effort controls the 'thinking budget' for advanced models (like Gemma 4).")
     print("[WARNING] Lowering the reasoning effort below 'high' may negatively impact your RV session accuracy and analytical depth!")
     effort_input = input(f"Enter reasoning effort [low/medium/high/none] (Press Enter to keep '{current_effort}'): ").strip().lower()
     
