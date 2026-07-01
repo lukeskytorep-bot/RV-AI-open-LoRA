@@ -517,9 +517,14 @@ if __name__ == "__main__":
     
     config = load_config()
 
-    if "profiles" not in config or not config.get("LAST_PROFILE"):
+   if "profiles" not in config or not config.get("LAST_PROFILE"):
         print("\n[INFO] First time setup detected.")
-        config = update_api_settings(config, "Default-Profile")
+        first_profile = input("\nEnter your first Profile Name (e.g. CBA0): ").strip()
+        if not first_profile: 
+            first_profile = "Default-Profile"
+        config = update_api_settings(config, first_profile)
+        config["LAST_PROFILE"] = first_profile
+        save_config(config)
 
     system_prompt = ensure_document(SYSTEM_PROMPT_LOCAL_FILE, SYSTEM_PROMPT_RAW_URL, "System Prompt")
     if not system_prompt:
