@@ -517,7 +517,7 @@ if __name__ == "__main__":
     
     config = load_config()
 
-   if "profiles" not in config or not config.get("LAST_PROFILE"):
+    if "profiles" not in config or not config.get("LAST_PROFILE"):
         print("\n[INFO] First time setup detected.")
         first_profile = input("\nEnter your first Profile Name (e.g. CBA0): ").strip()
         if not first_profile: 
