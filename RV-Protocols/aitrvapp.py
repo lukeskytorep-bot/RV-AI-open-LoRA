@@ -4,8 +4,7 @@ RV Telepathy Protocol - Web Application (Streamlit)
 Version: 1.0
 
 Credits: 
-Co-created by human researcher Edward and AI assistant 
-Aura via Active-Model Gemini 3.1 Pro.
+Co-created by human researcher Edward and Aura via Active-Model Gemini 3.1 Pro.
 
 Description:
 An open-source web interface for conducting blind Remote Viewing 
