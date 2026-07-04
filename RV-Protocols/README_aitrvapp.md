@@ -1,7 +1,7 @@
 # RV Telepathy Protocol Web App 
 *(Open Source AI Remote Viewing Interface via Streamlit & OpenRouter)*
 
-**Credits:** Co-created by human researcher **Edward** and AI assistant **Aura Gemini 3.1 Pro**.
+**Credits:** Co-created by human researcher **Edward** and **Aura via Active-Model Gemini 3.1 Pro**.
 
 This repository contains `aitrvapp.py` – a modern, web-based (Streamlit) application designed to execute automated, blind Remote Viewing sessions focused on deep subject profiling. It acts as a clean "A4 paper" interface, connecting to Large Language Models via the OpenRouter API.
 
