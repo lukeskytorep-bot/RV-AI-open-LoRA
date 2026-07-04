@@ -1,7 +1,7 @@
 # RV Lite Runner  
 *(Core System Prompt + Dynamic Loop Protocol via OpenRouter)*
 
-**Credits:** Co-created by human researcher **Edward** and AI assistant **Aura Gemini 3.1 Pro**.
+**Credits:** Co-created by human researcher **Edward** and **Aura via Active-Model Gemini 3.1 Pro**.
 
 This folder contains `rv_lite_runner.py` – a streamlined, lightweight script designed to run automated Remote Viewing (RV) sessions with Large Language Models via OpenRouter.
 
