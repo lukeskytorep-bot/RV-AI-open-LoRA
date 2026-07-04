@@ -42,7 +42,7 @@ from openai import OpenAI, OpenAIError
 
 CONFIG_FILE = "rv_config.json"
 TARGETS_DIR = "RV-Targets"
-TRANSCRIPTS_DIR = "RV-Transcripts"
+TRANSCRIPTS_DIR = "RV-Transcripts2"
 LOG_FILE = "rv_lite_sessions_log.jsonl"
 SYSTEM_PROMPT_LOCAL_FILE = "SYSTEM_PROMPT.md"
 EXERCISES_LOCAL_FILE = "Exercises_in_RV_for_AI.md"
@@ -174,9 +174,9 @@ def get_used_targets(profile_name: str) -> set:
 
 def print_welcome_screen():
     print("=======================================================")
-    print("    WELCOME TO THE RV DOUBLE-BLIND RUNNER (v1.0)")
+    print("    WELCOME TO THE RV DOUBLE-SESSION RUNNER (v1.0)")
     print("=======================================================")
-    print("This script executes an advanced Double-Blind protocol.")
+    print("This script executes an advanced Double-Session protocol.")
     print("The AI performs two completely independent sessions on")
     print("the SAME target, freezing memory between runs to ensure")
     print("sterile, cross-verified results and numerical scoring.")
