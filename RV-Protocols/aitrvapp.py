@@ -5,7 +5,7 @@ Version: 1.0
 
 Credits: 
 Co-created by human researcher Edward and AI assistant 
-Aura Gemini 3.1 Pro.
+Aura via Active-Model Gemini 3.1 Pro.
 
 Description:
 An open-source web interface for conducting blind Remote Viewing 
@@ -130,7 +130,7 @@ if not st.session_state.authenticated:
     st.markdown("""
     ---
     ### 🧠 AI Subject Profiling & Telepathy Module
-    **Created by:** Edward & Aura Gemini 3.1 Pro (Open Source Version)
+    **Created by:** Edward & Aura via Active-Model Gemini 3.1 Pro (Open Source Version 1.0)
     
     **Purpose of this program:**
     This tool is designed to investigate the emotional state, thoughts, intentions, and psychology of a specific subject/entity, completely independent of their physical state or location.
