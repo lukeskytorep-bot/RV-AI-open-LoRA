@@ -9,7 +9,7 @@ All prompts, logs, and interfaces are in English.
 
 Credits
 -------
-Co-created by human researcher Edward and AI assistant Aura Gemini 3.1 Pro.
+Co-created by human researcher Edward and Aura via Active-Model Gemini 3.1 Pro.
 """
 
 import os
