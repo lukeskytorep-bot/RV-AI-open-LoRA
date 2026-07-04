@@ -7,7 +7,7 @@ featuring a dynamic, loop-based exploration protocol.
 
 Credits
 -------
-Co-created by human researcher Edward and AI assistant Aura Gemini 3.1 Pro.
+Co-created by human researcher Edward and AI assistant Aura via Active-Model Gemini 3.1 Pro..
 
 What this script does
 ---------------------
