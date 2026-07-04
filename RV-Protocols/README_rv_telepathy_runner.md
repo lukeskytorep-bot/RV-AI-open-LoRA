@@ -1,7 +1,7 @@
 # RV Telepathy Runner  
 *(Telepathy Module / Automated T0-T10 Protocol)*
 
-**Credits:** Co-created by human researcher **Edward** and AI assistant **Aura Gemini 3.1 Pro**.
+**Credits:** Co-created by human researcher **Edward** and **Aura via Active-Model Gemini 3.1 Pro**.
 
 This folder contains the `rv_telepathy_runner.py` file – a dedicated, highly automated script designed for conducting blind Remote Viewing sessions, with a specific focus on **subject and personality exploration (Telepathy Protocol)** using Large Language Models (LLMs) via the OpenRouter API.
 
