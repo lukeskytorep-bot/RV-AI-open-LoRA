@@ -9,9 +9,10 @@ Co-created by human researcher Edward and Aura via Active-Model Gemini 3.1 Pro.
 Description:
 An open-source web interface for conducting blind Remote Viewing 
 sessions focused on deep subject exploration (Phases T0-T10). 
-Protected by an access code (AIRV1234) and powered by OpenRouter API.
+Protected by an access code and powered by OpenRouter API.
 ====================================================================
 """
+
 import streamlit as st
 from openai import OpenAI
 import time
@@ -26,7 +27,7 @@ st.set_page_config(page_title="RV Telepathy Protocol", page_icon="👁️", layo
 # --- GLOBAL VARIABLES & LINKS ---
 SYSTEM_PROMPT_RAW_URL = "https://raw.githubusercontent.com/lukeskytorep-bot/RV-AI-open-LoRA/refs/heads/main/RV-Protocols/SYSTEM_PROMPT%E2%80%94REMOTE_VIEWING_CORE_V_2.md"
 PROTOCOL_ARCHIVE_URL = "https://archive.org/details/telepathy-module-protocol-for-ai-viewer-v-1.1"
-GITHUB_REPO_URL = "https://github.com/lukeskytorep-bot/RV-AI-open-LoRA/blob/main/RV-Protocols/AITRVapp.py"
+GITHUB_REPO_URL = "https://github.com/lukeskytorep-bot/RV-AI-open-LoRA/blob/main/RV-Protocols/aitrvapp.py" 
 # Fetch the hidden code from server settings (Hugging Face Secrets)
 # If we want multiple codes, we separate them with commas in the settings
 env_codes = os.getenv("RV_ACCESS_CODE", "NO_CODE")
@@ -50,7 +51,6 @@ def ensure_system_prompt():
         return f.read()
 
 def call_openrouter(api_key, messages):
-    # Domyślny model i rygorystyczny tryb "myślenia"
     client = OpenAI(base_url="https://openrouter.ai/api/v1", api_key=api_key)
     try:
         response = client.chat.completions.create(
@@ -96,8 +96,8 @@ with st.sidebar:
     if st.session_state.authenticated:
         st.success("Access Granted")
         
-        # Pobieranie klucza API (pozwala każdemu użyć własnego konta w wersji Open Source)
-        api_key = st.text_input("OpenRouter API Key:", type="password")
+        # Pobieranie klucza API ze zmiennych środowiskowych serwera
+        api_key = os.getenv("OPENROUTER_API_KEY")
         
         st.divider()
         st.session_state.custom_t9 = st.text_area("Phase T9 Questions (Leave empty for default):")
@@ -105,7 +105,7 @@ with st.sidebar:
         start_disabled = st.session_state.app_phase != "setup"
         if st.button("🚀 START SESSION", disabled=start_disabled, use_container_width=True):
             if not api_key:
-                st.error("API Key is required!")
+                st.error("API Key not found in server secrets! Please configure OPENROUTER_API_KEY.")
             else:
                 st.session_state.api_key = api_key
                 st.session_state.app_phase = "running_base"
@@ -194,9 +194,25 @@ if st.session_state.app_phase == "running_base":
 if st.session_state.app_phase == "chat":
     st.success("✅ AI has completed base phases (T0-T9) and awaits further questions or a signal to end the session.")
     
+    # Inject CSS for chat input (light blue background, larger font)
+    st.markdown("""
+    <style>
+    div[data-testid="stChatInput"] textarea {
+        background-color: #EBF5FB !important;
+        border: 2px solid #3498DB !important;
+        font-size: 18px !important;
+        color: #1a1a1a !important;
+    }
+    div[data-testid="stChatInput"] textarea::placeholder {
+        color: #2874A6 !important;
+        font-weight: bold !important;
+    }
+    </style>
+    """, unsafe_allow_html=True)
+    
     col1, col2 = st.columns([3, 1])
     with col1:
-        live_question = st.chat_input("Ask AI ISBE...")
+        live_question = st.chat_input("Enter your questions for the target here...")
         if live_question:
             st.session_state.messages.append({"role": "user", "content": live_question})
             with st.spinner("AI ISBE is analyzing the field..."):
@@ -229,9 +245,31 @@ if st.session_state.app_phase == "reveal":
     st.error("🔒 Blind session closed. Time for Feedback.")
     st.subheader("Target Reveal")
     
-    real_target = st.text_area("Paste the real target description here for AI evaluation:")
+    # Inject CSS for target reveal area (light red background, larger font)
+    st.markdown("""
+    <style>
+    div[data-testid="stTextArea"] textarea {
+        background-color: #FDEDEC !important;
+        border: 2px solid #E74C3C !important;
+        font-size: 16px !important;
+        color: #1a1a1a !important;
+    }
+    div[data-testid="stTextArea"] textarea::placeholder {
+        color: #C0392B !important;
+        font-weight: bold !important;
+    }
+    </style>
+    """, unsafe_allow_html=True)
     
-    if st.button("Reveal Target & Generate Evaluation"):
+    placeholder_text = "Enter what the target was here.\nPlus: if you have photos, you can describe them in text format."
+    
+    real_target = st.text_area(
+        label="Paste the target data below:", 
+        placeholder=placeholder_text, 
+        height=200
+    )
+    
+    if st.button("Reveal Target & Generate Evaluation", type="primary"):
         if real_target:
             st.session_state.real_target = real_target
             st.session_state.app_phase = "evaluation"
@@ -255,8 +293,51 @@ if st.session_state.app_phase == "evaluation":
     add_to_transcript(f"**AI Evaluation (Feedback)**\n\n{reply}")
     transcript_placeholder.markdown(st.session_state.transcript)
     
-    st.session_state.app_phase = "finished"
+    # Initialize variable for post-session questions
+    st.session_state.post_questions_count = 0
+    st.session_state.app_phase = "post_reveal_chat"
     st.rerun()
+
+# --- POST-REVEAL CHAT (Conversation with Nemo - Max 5 questions) ---
+if st.session_state.app_phase == "post_reveal_chat":
+    st.success("✅ AI has completed the evaluation. You can now download the session or ask up to 5 questions about the target.")
+    
+    # Inject CSS for the final question input (Optional green/gray styling)
+    st.markdown("""
+    <style>
+    div[data-testid="stChatInput"] textarea {
+        background-color: #E9F7EF !important;
+        border: 2px solid #27AE60 !important;
+        font-size: 18px !important;
+        color: #1a1a1a !important;
+    }
+    div[data-testid="stChatInput"] textarea::placeholder {
+        color: #1E8449 !important;
+        font-weight: bold !important;
+    }
+    </style>
+    """, unsafe_allow_html=True)
+    
+    col1, col2 = st.columns([3, 1])
+    
+    with col1:
+        if st.session_state.post_questions_count < 5:
+            post_q = st.chat_input(f"Ask Nemo about the target (Question {st.session_state.post_questions_count + 1}/5)...")
+            if post_q:
+                st.session_state.post_questions_count += 1
+                st.session_state.messages.append({"role": "user", "content": post_q})
+                with st.spinner("Nemo is analyzing the feedback..."):
+                    reply = call_openrouter(st.session_state.api_key, st.session_state.messages)
+                    st.session_state.messages.append({"role": "assistant", "content": reply})
+                    add_to_transcript(f"**Post-Session Question {st.session_state.post_questions_count}/5:** {post_q}\n\n**Nemo Response:**\n{reply}\n\n---\n")
+                    st.rerun()
+        else:
+            st.info("You have reached the maximum of 5 post-session questions.")
+            
+    with col2:
+        if st.button("🏁 FINISH & SAVE SESSION", use_container_width=True, type="primary"):
+            st.session_state.app_phase = "finished"
+            st.rerun()
 
 # --- ENDING & DOWNLOAD ---
 if st.session_state.app_phase == "finished":
@@ -275,4 +356,6 @@ if st.session_state.app_phase == "finished":
         st.session_state.transcript = ""
         st.session_state.messages = []
         st.session_state.target_id = generate_target_id()
+        st.session_state.custom_t9 = ""
+        st.session_state.post_questions_count = 0
         st.rerun()
