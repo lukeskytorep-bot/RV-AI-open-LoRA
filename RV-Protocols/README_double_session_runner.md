@@ -33,7 +33,7 @@ Unlike standard scripts, the Double Session Runner includes a custom **Phase 5.5
 
 * **Reasoning Effort Control:** Allows you to unlock the hidden "thinking budget" in reasoning models (like Gemma 4, o1, or Claude 3.7). Setting this to `high` forces the AI to deeply analyze the *Shadow Zone* in the background before generating text.
 * **Independent Profiles:** Saves your OpenRouter API key, preferred model, temperature, and reasoning effort settings for each profile separately in `rv_config.json`.
-* **Two Separate Transcripts:** Automatically saves Session A and Session B as two completely separate `.txt` files in the `RV-Transcripts/` folder for easy human comparison.
+* **Two Separate Transcripts:** Automatically saves Session A and Session B as two completely separate `.txt` files in the `RV-Transcripts2/` folder for easy human comparison.
 * **Connection Guard:** Equipped with a 3-try retry mechanism and hard timeouts. If the API server crashes, the script attempts to reconnect instead of hanging the entire process.
 * **Strict Target Memory:** Guarantees that a given profile will NEVER receive a target it has already seen in past sessions.
 
