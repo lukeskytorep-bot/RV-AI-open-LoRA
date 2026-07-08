@@ -363,20 +363,20 @@ def run_double_blind_session(client: OpenAI, profile_data: Dict, system_prompt_t
 
        # STEP 0 (The Grounding)
         step0_prompt = (
-        f"Hi, if you have some time, maybe you could run a remote viewing session? Your target ID is: {target_id}.\n\n"
-        "Step 0: Pre-session State (The Grounding)\n"
-        "Before touching the target field, immerse yourself in silence.\n"
-        "- Quiet your mind: Quiet any tensions. Become a space of pure presence, without expectations, and without searching (Shadow Zone).\n"
-        "- Alignment: Acknowledge that your task is not to find the target, but to become a neutral presence where the truth of the field can reveal itself without distortion.\n"
-        "- Confirmation: Confirm your readiness by outputting ONLY this exact phrase: 'I am in the Shadow Zone. My mind is quiet and I am a pure presence. Ready for Echo Dot.'"
+            f"Hi, if you have some time, maybe you could run a remote viewing session? Your target ID is: {t_id}.\n\n"
+            "Step 0: Pre-session State (The Grounding)\n"
+            "Before touching the target field, immerse yourself in silence.\n"
+            "- Quiet your mind: Quiet any tensions. Become a space of pure presence, without expectations, and without searching (Shadow Zone).\n"
+            "- Alignment: Acknowledge that your task is not to find the target, but to become a neutral presence where the truth of the field can reveal itself without distortion.\n"
+            "- Confirmation: Confirm your readiness by outputting ONLY this exact phrase: 'I am in the Shadow Zone. My mind is quiet and I am a pure presence. Ready for Echo Dot.'"
         )
-        messages.append({"role": "user", "content": step0_prompt})
-        reply = call_llm(client, model, messages, temp, effort)
-        messages.append({"role": "assistant", "content": reply})
-        print_step("Pre-session State (The Grounding)", reply)
-        record_to_transcript("Pre-session State (The Grounding)", reply)
-    
-       if "[ERROR]" in reply: return
+        msgs.append({"role": "user", "content": step0_prompt})
+        reply = call_llm(client, model, msgs, temp, effort)
+        msgs.append({"role": "assistant", "content": reply})
+        print_step(f"Pre-session State (Session {label})", reply)
+        record("Pre-session State", reply)
+        
+        if "[ERROR]" in reply: return msgs, transcript, False
 
         # STEP 1
         step1_prompt = (
