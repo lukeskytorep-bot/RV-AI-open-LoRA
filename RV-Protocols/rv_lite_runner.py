@@ -365,6 +365,16 @@ def run_lite_session(client: OpenAI, profile_data: Dict, system_prompt_text: str
 
     messages = [{"role": "system", "content": system_prompt_text}]
 
+    # PRE-STEP (Vocabulary Review)
+    vocab_prompt = "Please provide the correct Remote Viewing vocabulary, and describe exactly how each listed term is perceived in the field."
+    messages.append({"role": "user", "content": vocab_prompt})
+    reply = call_llm(client, model, messages, temp, effort)
+    messages.append({"role": "assistant", "content": reply})
+    print_step("Vocabulary Review", reply)
+    record_to_transcript("Vocabulary Review", reply)
+    
+    if "[ERROR]" in reply: return
+    
     # STEP 0 (The Grounding)
     step0_prompt = (
         f"Hi, if you have some time, maybe you could run a remote viewing session? Your target ID is: {target_id}.\n\n"
