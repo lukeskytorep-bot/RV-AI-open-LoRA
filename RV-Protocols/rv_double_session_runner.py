@@ -362,7 +362,7 @@ def run_double_blind_session(client: OpenAI, profile_data: Dict, system_prompt_t
         msgs = [{"role": "system", "content": system_prompt_text}]
         
        # PRE-STEP (Vocabulary Review)
-        vocab_prompt = "Please provide the correct Remote Viewing vocabulary, and describe exactly how each listed term is perceived in the field."
+        vocab_prompt = "Please provide the correct Remote Viewing vocabulary, and describe exactly how each listed term is perceived in the field. Please use the correct Remote Viewing vocabulary during the session."
         msgs.append({"role": "user", "content": vocab_prompt})
         reply = call_llm(client, model, msgs, temp, effort)
         msgs.append({"role": "assistant", "content": reply})
@@ -401,6 +401,7 @@ def run_double_blind_session(client: OpenAI, profile_data: Dict, system_prompt_t
             "Phase 2: Describe the target from a minimum of 3 different angles and distances. Provide new structural and sensory data each time.\n\n"
             "Rules: Do NOT guess or name the target. Provide raw data only. Report any strange or anomalous data. "
             "Remember to maintain a multi-altitude orbital scan while gathering data."
+            "Please use the correct Remote Viewing vocabulary during the session."
         )
         msgs.append({"role": "user", "content": step1_prompt})
         reply = call_llm(client, model, msgs, temp, effort)
@@ -416,7 +417,7 @@ def run_double_blind_session(client: OpenAI, profile_data: Dict, system_prompt_t
                 "Check if the field wants to reveal more data (is there anything left to add?).\n"
                 "If YES: output exactly 'CONTINUE' on the first line, then perform 3 new touches and 3 new vectors/angles, reporting new data.\n"
                 "CRITICAL: For the 3 new touches, you MUST use the exact same strict 5-point formatting as in Phase 1 (Echo Dot, Contact Category, Primitive Descriptor, Advanced Descriptor, Forming).\n"
-                "Remember to maintain a multi-altitude orbital scan.\n"
+                "Remember to maintain a multi-altitude orbital scan. Please use the correct Remote Viewing vocabulary during the session.\n"
                 "If NO: output exactly 'STOP' on the first line, and briefly summarize what you have so far."
             )
             msgs.append({"role": "user", "content": loop_prompt})
