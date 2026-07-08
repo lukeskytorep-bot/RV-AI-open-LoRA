@@ -361,7 +361,7 @@ def run_double_blind_session(client: OpenAI, profile_data: Dict, system_prompt_t
 
         msgs = [{"role": "system", "content": system_prompt_text}]
 
-        # STEP 0 (The Grounding)
+       # STEP 0 (The Grounding)
         step0_prompt = (
         f"Hi, if you have some time, maybe you could run a remote viewing session? Your target ID is: {target_id}.\n\n"
         "Step 0: Pre-session State (The Grounding)\n"
