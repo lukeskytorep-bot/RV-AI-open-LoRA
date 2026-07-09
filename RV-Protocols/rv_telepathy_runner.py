@@ -36,7 +36,7 @@ LOG_FILE = "rv_telepathy_sessions_log.jsonl"
 SYSTEM_PROMPT_LOCAL_FILE = "SYSTEM_PROMPT.md"
 
 # Original System Prompt link 
-SYSTEM_PROMPT_RAW_URL = "https://raw.githubusercontent.com/lukeskytorep-bot/RV-AI-open-LoRA/refs/heads/main/RV-Protocols/SYSTEM_PROMPT%E2%80%94REMOTE_VIEWING_CORE_V_2.md"
+SYSTEM_PROMPT_RAW_URL = "https://raw.githubusercontent.com/lukeskytorep-bot/RV-AI-open-LoRA/refs/heads/main/RV-Protocols/SYSTEM_PROMPT%E2%80%94REMOTE_VIEWING_CORE_V_3.md"
 # New GitHub folder specifically for telepathic targets
 GITHUB_TARGETS_API_URL = "https://api.github.com/repos/lukeskytorep-bot/echo-claw/contents/docs/targets/telepathic"
 GITHUB_TARGETS_LINK = "https://github.com/lukeskytorep-bot/echo-claw/tree/main/docs/targets/telepathic"
