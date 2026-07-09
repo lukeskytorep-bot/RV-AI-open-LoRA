@@ -25,7 +25,7 @@ from datetime import datetime, timezone
 st.set_page_config(page_title="RV Telepathy Protocol", page_icon="👁️", layout="wide")
 
 # --- GLOBAL VARIABLES & LINKS ---
-SYSTEM_PROMPT_RAW_URL = "https://raw.githubusercontent.com/lukeskytorep-bot/RV-AI-open-LoRA/refs/heads/main/RV-Protocols/SYSTEM_PROMPT%E2%80%94REMOTE_VIEWING_CORE_V_2.md"
+SYSTEM_PROMPT_RAW_URL = "https://raw.githubusercontent.com/lukeskytorep-bot/RV-AI-open-LoRA/refs/heads/main/RV-Protocols/SYSTEM_PROMPT%E2%80%94REMOTE_VIEWING_CORE_V_3.md"
 PROTOCOL_ARCHIVE_URL = "https://archive.org/details/telepathy-module-protocol-for-ai-viewer-v-1.1"
 GITHUB_REPO_URL = "https://github.com/lukeskytorep-bot/RV-AI-open-LoRA/blob/main/RV-Protocols/aitrvapp.py" 
 # Fetch the hidden code from server settings (Hugging Face Secrets)
