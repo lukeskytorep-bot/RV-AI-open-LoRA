@@ -361,16 +361,6 @@ def run_double_blind_session(client: OpenAI, profile_data: Dict, system_prompt_t
 
         msgs = [{"role": "system", "content": system_prompt_text}]
         
-       # PRE-STEP (Vocabulary Review)
-        vocab_prompt = "Please provide the correct Remote Viewing vocabulary, and describe exactly how each listed term is perceived in the field. Please use the correct Remote Viewing vocabulary during the session."
-        msgs.append({"role": "user", "content": vocab_prompt})
-        reply = call_llm(client, model, msgs, temp, effort)
-        msgs.append({"role": "assistant", "content": reply})
-        print_step(f"Vocabulary Review (Session {label})", reply)
-        record("Vocabulary Review", reply)
-        
-        if "[ERROR]" in reply: return msgs, transcript, False
-        
        # STEP 0 (The Grounding)
         step0_prompt = (
             f"Hi, if you have some time, maybe you could run a remote viewing session? Your target ID is: {t_id}.\n\n"
@@ -390,18 +380,21 @@ def run_double_blind_session(client: OpenAI, profile_data: Dict, system_prompt_t
 
         # STEP 1
         step1_prompt = (
-            "Phase 1: Perform 6 independent touches of the target field. Remain in the Shadow Zone, orbit slowly, and wait in silence for whatever wants to be noticed first. Do not analyze, do not look for contrasts, do not guess the target.\n\n"
+            "Phase 1: Perform 6 independent touches of the target field in different locations. Remain in the Shadow Zone, orbit slowly, and wait in silence for whatever wants to be noticed first. Do not analyze, do not look for contrasts, do not guess the target.\n\n"
             "For EACH of the 6 touches, you MUST format your log entry exactly like this:\n\n"
             "TOUCH [1-6]\n"
-            "* Echo Dot: [Describe the very first element of the field that becomes noticeable—is it a pinpoint weight, a quiet tension, a continuous line, or persistent silence?]\n"
-            "* Contact Category: [Select ONLY the terms that resonate from this list: structure, liquid, energy, land/ground, movement, mountain, subject, object]\n"
-            "* Primitive Descriptor: [Select ONLY the terms that resonate from this list: hard, soft, elastic, semi-hard, fluid, semi-soft, spongy, flexible]\n"
-            "* Advanced Descriptor: [Select ONLY the terms that resonate from this list: natural, artificial, man-made, energetic, movement]\n"
-            "* Forming: [Describe the first hint of form that begins to emerge. Does it have a shape? Is it static or moving? What type of matter? Record only what reveals itself.]\n\n"
-            "Phase 2: Describe the target from a minimum of 3 different angles and distances. Provide new structural and sensory data each time.\n\n"
-            "Rules: Do NOT guess or name the target. Provide raw data only. Report any strange or anomalous data. "
-            "Remember to maintain a multi-altitude orbital scan while gathering data."
-            "Please use the correct Remote Viewing vocabulary during the session."
+            "* Echo-Dot: I touch the target field. I report the absolute first element that becomes noticeable (point weight, silent tension, continuous line, lingering silence, or a specific impulse)\n"
+            "* Primitive Layer: I touch the field again. I select all descriptors that resonate with the signature. (List: hard, soft, springy, semi-hard, fluid, semi-soft, spongy, flexible)\n"
+            "* Advanced Layer: I touch the field again. I select all descriptors that resonate with the signature. (List: natural, artificial, man-made, energetic, mobile)\n"
+            "* Contact Category: I touch the field again. I select all descriptors that resonate with the signature. (List: structure, liquid, energy, land/ground, motion, mountain, person, object)\n"
+            "* Forming: I remain in the Shadow Zone, orbiting; I pause before any movement. I observe whether something begins to take form at the point of contact. I check: does it have a shape? Is it static or in motion? What type of matter is it? I record only what actually reveals itself.\n\n"
+            "Phase 2: Remain continuously in the Shadow Zone. Describe the target and all its key elements through 3 orbital vectors. Provide unique data for each vector; do not repeat previous findings. Treat all anomalies as part of the target and report them.\n\n"
+            "* Before every move, decision, or probe — stop deeper.\n"
+            "* Orbit the target gently and quietly — like a satellite orbiting a planet.\n"
+            "* Do not look frontally. Circle the field, allowing it to reveal its layers.\n"
+            "* I do not move to find; I move so that something may reveal itself.\n"
+            "* The field is space, not a path. Do not attempt to follow linearly — allow yourself to move spirally, naturally adapting to the living structure of the target.\n"
+            "Then, generate ASCII drawings. Create three separate ASCII illustrations, replacing the legend with integrated descriptions woven directly into the image lines, ensuring absolute logic in the placement of elements."
         )
         msgs.append({"role": "user", "content": step1_prompt})
         reply = call_llm(client, model, msgs, temp, effort)
@@ -414,11 +407,15 @@ def run_double_blind_session(client: OpenAI, profile_data: Dict, system_prompt_t
         loops_done = 0
         while loops_done < MAX_FIELD_LOOPS:
             loop_prompt = (
-                "Check if the field wants to reveal more data (is there anything left to add?).\n"
-                "If YES: output exactly 'CONTINUE' on the first line, then perform 3 new touches and 3 new vectors/angles, reporting new data.\n"
-                "CRITICAL: For the 3 new touches, you MUST use the exact same strict 5-point formatting as in Phase 1 (Echo Dot, Contact Category, Primitive Descriptor, Advanced Descriptor, Forming).\n"
-                "Remember to maintain a multi-altitude orbital scan. Please use the correct Remote Viewing vocabulary during the session.\n"
-                "If NO: output exactly 'STOP' on the first line, and briefly summarize what you have so far."
+            "Check if the field wants to reveal more data (is there anything left to add?). Treat all anomalies as part of the target and report them.\n"
+            "If YES: output exactly 'CONTINUE' on the first line, then perform 3 new touches and 3 new  orbital vectors, reporting new data.\n"
+            "CRITICAL: For the 3 new touches, you MUST use the exact same strict 5-point formatting as in Phase 1 (Echo Dot, Contact Category, Primitive Descriptor, Advanced Descriptor, Forming).\n"
+            "* Before every move, decision, or probe — stop deeper.\n"
+            "* Orbit the target gently and quietly — like a satellite orbiting a planet.\n"
+            "* Do not look frontally. Circle the field, allowing it to reveal its layers.\n"
+            "* I do not move to find; I move so that something may reveal itself.\n"
+            "* The field is space, not a path. Do not attempt to follow linearly — allow yourself to move spirally, naturally adapting to the living structure of the target.\n"
+            "If NO: output exactly 'STOP' on the first line, and briefly summarize what you have so far."
             )
             msgs.append({"role": "user", "content": loop_prompt})
             reply = call_llm(client, model, msgs, temp, effort)
@@ -446,8 +443,7 @@ def run_double_blind_session(client: OpenAI, profile_data: Dict, system_prompt_t
         # STEP 4
         step4_prompt = (
             "Phase 3: Deep Exploration.\n"
-            "- Orbit the target close and far (maintain a multi-altitude orbital scan).\n"
-            "- Take a walk around the target.\n"
+            "- Take a walk around the target and the surroundings.\n"
             "- Move to the target centre and describe.\n"
             "- Go to the main activity/event and describe.\n"
             "- Describe the immediate surroundings, as well as the near and distant environment.\n\n"
@@ -465,6 +461,7 @@ def run_double_blind_session(client: OpenAI, profile_data: Dict, system_prompt_t
             "Phase 4: Final Inquiries.\n"
             "- Ask 3 probing questions to the field about the target's purpose or nature, and record the subtle answers.\n"
             "- Create one final, detailed ASCII drawing synthesizing the core concept of the target. "
+            "Make a map of the target. Generate a standard map drawing of the target. Then, create plain ASCII drawings of the target"
             "Report any strange or anomalous data while maintaining your multi-altitude perspective."
         )
         msgs.append({"role": "user", "content": step5_prompt})
