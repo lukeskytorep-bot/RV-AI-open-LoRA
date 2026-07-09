@@ -46,7 +46,7 @@ LOG_FILE = "rv_lite_sessions_log.jsonl"
 SYSTEM_PROMPT_LOCAL_FILE = "SYSTEM_PROMPT.md"
 EXERCISES_LOCAL_FILE = "Exercises_in_RV_for_AI.md"
 
-SYSTEM_PROMPT_RAW_URL = "https://raw.githubusercontent.com/lukeskytorep-bot/RV-AI-open-LoRA/refs/heads/main/RV-Protocols/SYSTEM_PROMPT%E2%80%94REMOTE_VIEWING_CORE_V_2.md"
+SYSTEM_PROMPT_RAW_URL = "https://raw.githubusercontent.com/lukeskytorep-bot/RV-AI-open-LoRA/refs/heads/main/RV-Protocols/SYSTEM_PROMPT%E2%80%94REMOTE_VIEWING_CORE_V_3.md"
 EXERCISES_RAW_URL = "https://raw.githubusercontent.com/lukeskytorep-bot/RV-AI-open-LoRA/refs/heads/main/RV-Protocols/Exercises_in_RV_%20for_AI.md"
 GITHUB_TARGETS_LINK = "https://github.com/lukeskytorep-bot/echo-claw/tree/main/docs/targets"
 
