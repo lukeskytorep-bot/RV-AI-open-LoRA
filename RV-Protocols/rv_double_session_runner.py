@@ -443,6 +443,7 @@ def run_double_blind_session(client: OpenAI, profile_data: Dict, system_prompt_t
         # STEP 4
         step4_prompt = (
             "Phase 3: Deep Exploration.\n"
+            "- Move on to the main aspect of the target and describe.\n"
             "- Take a walk around the target and the surroundings.\n"
             "- Move to the target centre and describe.\n"
             "- Go to the main activity/event and describe.\n"
