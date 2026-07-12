@@ -364,16 +364,6 @@ def run_lite_session(client: OpenAI, profile_data: Dict, system_prompt_text: str
         transcript_content += "="*80 + "\n\n"
 
     messages = [{"role": "system", "content": system_prompt_text}]
-
-    # PRE-STEP (Vocabulary Review)
-    vocab_prompt = "Please provide the correct Remote Viewing vocabulary, and describe exactly how each listed term is perceived in the field. Please use the correct Remote Viewing vocabulary during the session."
-    messages.append({"role": "user", "content": vocab_prompt})
-    reply = call_llm(client, model, messages, temp, effort)
-    messages.append({"role": "assistant", "content": reply})
-    print_step("Vocabulary Review", reply)
-    record_to_transcript("Vocabulary Review", reply)
-    
-    if "[ERROR]" in reply: return
     
     # STEP 0 (The Grounding)
     step0_prompt = (
