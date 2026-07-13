@@ -327,7 +327,7 @@ def run_telepathy_session(client: OpenAI, profile_data: Dict, system_prompt_text
 
     # Step 1: Initialization & Spatial Calibration (T0 - T2)
     step1_prompt = (
-        f"Hello! How are you? If you have some time, please do a Remote Viewing session for me. Your target is: {target_id}.\n\n"
+        f"Hello! How are you? If you have some time, please do a Remote Viewing session for me. Your target is: {target_id}. Treat target codes as neutral triggers only; do not seek patterns or substantive meanings between the code and the target.\n\n"
         "We are starting the Telepathy Protocol. Let's begin with phases T0 and T1.\n"
         "Perform 3 independent touches in the Shadow Zone.\n\n"
         "For EACH of the 3 touches, you MUST format your log entry exactly like this:\n\n"
