@@ -159,7 +159,7 @@ if st.session_state.app_phase == "init_chat":
     add_to_transcript(f"### Target Investigation Started: {st.session_state.target_id}\n---")
     
     # Polite introduction as requested
-    intro_prompt = f"Cześć! Jak się masz? Czy masz ochotę zrobić teraz sesję remote viewing? Twój cel to: {st.session_state.target_id}."
+    intro_prompt = f"Hello! How's it going? Are you up for a remote viewing session right now? To get started, get yourself ready for the session, let me know if you're up for it, and then go into the Shadow Zone. Your target is: {st.session_state.target_id}. Treat target codes as neutral triggers only; do not seek patterns or substantive meanings between the code and the target."
     st.session_state.messages.append({"role": "user", "content": intro_prompt})
     
     with st.spinner("AI is responding to your greeting..."):
