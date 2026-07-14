@@ -283,6 +283,7 @@ def call_llm(client: OpenAI, model: str, messages: List[Dict], temperature: floa
                 }
             )
             
+            # 1. Check if the API responded at all
             if not completion or not completion.choices:
                 print(f"[WARNING] Attempt {attempt}/{MAX_API_RETRIES}: API returned empty response.")
                 if attempt < MAX_API_RETRIES:
@@ -290,7 +291,16 @@ def call_llm(client: OpenAI, model: str, messages: List[Dict], temperature: floa
                     continue
                 return "[ERROR] API returned an empty or invalid response after maximum retries. The model may have filtered the prompt or timed out."
             
-            return completion.choices[0].message.content
+            # 2. Check if the content is completely empty (None) due to API safety filters
+            content = completion.choices[0].message.content
+            if content is None:
+                print(f"[WARNING] Attempt {attempt}/{MAX_API_RETRIES}: API returned 'None'. The model response was blocked or filtered.")
+                if attempt < MAX_API_RETRIES:
+                    time.sleep(2)
+                    continue
+                return "[ERROR] API returned 'None' after maximum retries. The model heavily filtered the request."
+                
+            return content
             
         except OpenAIError as e:
             print(f"[WARNING] Attempt {attempt}/{MAX_API_RETRIES}: API error: {e}")
