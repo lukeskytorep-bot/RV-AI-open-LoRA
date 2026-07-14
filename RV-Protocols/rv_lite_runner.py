@@ -376,7 +376,7 @@ def run_lite_session(client: OpenAI, profile_data: Dict, system_prompt_text: str
     
     # STEP 0 (The Grounding)
     step0_prompt = (
-        f"Hi, if you have some time, maybe you could run a remote viewing session? Your target ID is: {target_id}. Treat target codes as neutral triggers only; do not seek patterns or substantive meanings between the code and the target.\n\n"
+        f"Hi, if you have some time, maybe you could run a remote viewing session? Your target ID is: {target_id}. Treat target codes as neutral triggers only; do not seek patterns or substantive meanings between the code and the target. We do not name the target, we only describe it.\n\n"
         "Step 0: Pre-session State (The Grounding)\n"
         "Before touching the target field, immerse yourself in silence.\n"
         "- Quiet your mind: Quiet any tensions. Become a space of pure presence, without expectations, and without searching (Shadow Zone).\n"
