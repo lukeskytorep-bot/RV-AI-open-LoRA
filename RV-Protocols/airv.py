@@ -31,7 +31,7 @@ MODEL_BASE = "deepseek/deepseek-v4-pro" # DeepSeek v4 Pro for blind session and 
 MODEL_CHAT = "google/gemma-4-31b-it"    # Gemma for post-reveal conversation
 
 # Secure access code logic (supports comma separated codes from Hugging Face secrets)
-env_codes = os.getenv("RV_ACCESS_CODE", "1234")
+env_codes = os.getenv("RV_ACCESS_CODE", "")
 ALLOWED_CODES = [code.strip() for code in env_codes.split(",")]
 
 # --- HELPER FUNCTIONS ---
@@ -151,7 +151,7 @@ if not st.session_state.authenticated:
     
     **Security:**
     Protected by an access code to prevent unauthorized API usage. 
-    👉 **Please enter the Access Code in the left sidebar to begin.**
+    👉 **Please enter the Access Code (1234) in the left sidebar to begin.**
     
     **Resources:**
     * 💻 [Source Code & Protocol (GitHub)]({GITHUB_REPO_URL})
