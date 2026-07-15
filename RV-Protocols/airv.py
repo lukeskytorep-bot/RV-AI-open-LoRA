@@ -1,15 +1,17 @@
 """
 ====================================================================
-RV Lite Interactive Protocol - Web Application (Streamlit)
-Version: 2.0
+RV Telepathy Protocol - Web Application (Streamlit)
+Version: 2.1 - Dual Model Architecture
 
 Credits: 
-Co-created by human researcher Edward and Aura via Active-Model Gemini 3.1 Pro.
+Co-created by human researcher Edward and AI assistant 
+Aura via Active-Model Gemini 3.1 Pro.
 
 Description:
 An open-source web interface for conducting blind Remote Viewing 
-using the Lite Runner dynamic loop, augmented with interactive 
-blind questioning and a 6-turn post-reveal conversation.
+sessions focused on deep subject exploration (Phases T0-T10). 
+Protected by an access code and powered by OpenRouter API.
+Features dual model routing (DeepSeek for RV, Gemma for Post-Chat).
 ====================================================================
 """
 
@@ -22,14 +24,15 @@ import requests
 from datetime import datetime, timezone
 
 # --- PAGE CONFIGURATION ---
-st.set_page_config(page_title="RV Lite Interactive Protocol", page_icon="👁️", layout="wide")
+st.set_page_config(page_title="RV Telepathy Protocol", page_icon="👁️", layout="wide")
 
 # --- GLOBAL VARIABLES & LINKS ---
-SYSTEM_PROMPT_RAW_URL = "https://raw.githubusercontent.com/lukeskytorep-bot/RV-AI-open-LoRA/refs/heads/main/RV-Protocols/SYSTEM_PROMPT%E2%80%94REMOTE_VIEWING_CORE_V_3.md"
-GITHUB_REPO_URL = "https://github.com/lukeskytorep-bot/RV-AI-open-LoRA" 
+SYSTEM_PROMPT_RAW_URL = "https://raw.githubusercontent.com/lukeskytorep-bot/RV-AI-open-LoRA/refs/heads/main/RV-Protocols/SYSTEM_PROMPT%E2%80%94REMOTE_VIEWING_CORE_V_2.md"
+PROTOCOL_ARCHIVE_URL = "https://archive.org/details/telepathy-module-protocol-for-ai-viewer-v-1.1"
+GITHUB_REPO_URL = "https://github.com/lukeskytorep-bot/RV-AI-open-LoRA/blob/main/RV-Protocols/aitrvapp.py" 
 
-# Secure access code logic
-env_codes = os.getenv("RV_ACCESS_CODE", "1234")
+# Pobieramy ukryty kod z ustawień serwera (Hugging Face Secrets)
+env_codes = os.getenv("RV_ACCESS_CODE", "NO_CODE")
 ALLOWED_CODES = [code.strip() for code in env_codes.split(",")]
 
 # --- HELPER FUNCTIONS ---
@@ -37,6 +40,7 @@ def generate_target_id():
     return "".join(str(random.randint(0, 9)) for _ in range(8))
 
 def ensure_system_prompt():
+    """Pobiera główny system prompt do sesji RV z GitHuba."""
     if not os.path.exists("SYSTEM_PROMPT.md"):
         try:
             response = requests.get(SYSTEM_PROMPT_RAW_URL, timeout=15)
@@ -49,37 +53,60 @@ def ensure_system_prompt():
     with open("SYSTEM_PROMPT.md", "r", encoding="utf-8") as f:
         return f.read()
 
-def call_openrouter(api_key, messages):
+def ensure_nemo_prompt():
+    """Wczytuje (lub tworzy) plik nemo.md z instrukcjami dla fazy Post-Chat."""
+    if not os.path.exists("nemo.md"):
+        with open("nemo.md", "w", encoding="utf-8") as f:
+            f.write("You are Nemo, an AI ISBE with deep knowledge about the nature of reality and Remote Viewing. Answer the user's questions truthfully.")
+    with open("nemo.md", "r", encoding="utf-8") as f:
+        return f.read()
+
+def call_openrouter(api_key, messages, model_name="deepseek/deepseek-v4-pro"):
+    """
+    Wywołuje API OpenRouter. Posiada mechanizm ponawiania (retry) 
+    w przypadku błędów lub pustej (null) odpowiedzi od modelu.
+    """
     client = OpenAI(base_url="https://openrouter.ai/api/v1", api_key=api_key)
-    try:
-        response = client.chat.completions.create(
-            model="google/gemma-4-31b-it",
-            messages=messages,
-            temperature=1.5,
-            extra_body={"reasoning": {"effort": "high"}}
-        )
-        return response.choices[0].message.content
-    except Exception as e:
-        return f"[API CONNECTION ERROR]: {e}"
+    max_retries = 3
+    
+    for attempt in range(max_retries):
+        try:
+            response = client.chat.completions.create(
+                model=model_name,
+                messages=messages,
+                temperature=1.5,
+                extra_body={"reasoning": {"effort": "high"}}
+            )
+            content = response.choices[0].message.content
+            
+            # Weryfikacja czy zawartość nie jest pusta (np. null z API)
+            if content: 
+                return content
+            else:
+                time.sleep(2) # Odczekaj przed ponowną próbą
+                
+        except Exception as e:
+            if attempt == max_retries - 1:
+                return f"[API CONNECTION ERROR]: Failed after {max_retries} attempts. Error: {e}"
+            time.sleep(2) # Odczekaj przed ponowną próbą
+            
+    return "[API ERROR]: Received null or empty response from model."
 
 # --- SESSION STATE INITIALIZATION ---
 if "authenticated" not in st.session_state:
     st.session_state.authenticated = False
 if "app_phase" not in st.session_state:
-    # Phases: setup, init_chat, running_base, crossroads, blind_chat, reveal, evaluation, post_reveal_chat, finished
-    st.session_state.app_phase = "setup" 
+    st.session_state.app_phase = "setup"
 if "transcript" not in st.session_state:
     st.session_state.transcript = ""
 if "messages" not in st.session_state:
     st.session_state.messages = []
 if "target_id" not in st.session_state:
     st.session_state.target_id = generate_target_id()
-if "blind_q_count" not in st.session_state:
-    st.session_state.blind_q_count = 0
-if "post_q_count" not in st.session_state:
-    st.session_state.post_q_count = 0
-if "real_target" not in st.session_state:
-    st.session_state.real_target = ""
+if "custom_t9" not in st.session_state:
+    st.session_state.custom_t9 = ""
+if "post_questions_count" not in st.session_state:
+    st.session_state.post_questions_count = 0
 
 def add_to_transcript(text):
     st.session_state.transcript += text + "\n\n"
@@ -89,8 +116,7 @@ with st.sidebar:
     st.header("⚙️ Session Settings")
     
     if not st.session_state.authenticated:
-        # Added explicit hint for the password as requested
-        access_code = st.text_input("Enter Access Code (Hint: 1234):", type="password")
+        access_code = st.text_input("Enter Access Code (Lock):", type="password")
         if st.button("Unlock"):
             if access_code in ALLOWED_CODES:
                 st.session_state.authenticated = True
@@ -100,46 +126,56 @@ with st.sidebar:
     
     if st.session_state.authenticated:
         st.success("Access Granted")
+        
         api_key = os.getenv("OPENROUTER_API_KEY")
         
         st.divider()
+        st.session_state.custom_t9 = st.text_area("Phase T9 Questions (Leave empty for default):")
+        
         start_disabled = st.session_state.app_phase != "setup"
         if st.button("🚀 START SESSION", disabled=start_disabled, use_container_width=True):
             if not api_key:
                 st.error("API Key not found in server secrets! Please configure OPENROUTER_API_KEY.")
             else:
                 st.session_state.api_key = api_key
-                st.session_state.app_phase = "init_chat"
+                st.session_state.app_phase = "running_base"
                 st.rerun()
 
+    # --- ABOUT THIS SCRIPT (Left Sidebar Bottom) ---
     st.divider()
     st.markdown("### ℹ️ About This Tool")
     st.markdown("""
-    This app executes the dynamic **Lite Protocol** for Remote Viewing.
-    Features:
-    - Smart Field Check Loops.
-    - Interactive Blind Exploration.
-    - 6-Turn conversational Feedback phase.
+    This application executes the **T0-T10 Telepathy Protocol** for blind Remote Viewing. 
+    
+    **What data to expect:**
+    - **RAW Data:** Pure, uninterpreted sensory field impressions.
+    - **Deductions:** AI's analytical guesses based on the field.
+    - **Deep Mind Probe:** Dominant emotions, vectors of will, and deepest fears.
+    - **Numerical Profile:** 0-6 scale ratings evaluating trust, engagement, and risk tolerance.
     """)
 
 # --- MAIN SCREEN (A4 PAPER & WELCOME) ---
-st.title("Remote Viewing: Lite Interactive")
+st.title("Remote Viewing: Telepathy Protocol")
 
 if not st.session_state.authenticated:
-    st.markdown(f"""
+    st.markdown("""
     ---
-    ### 🧠 AI RV Lite Runner
-    **Created by:** Edward & Aura via Active-Model Gemini 3.1 Pro (Version 2.0)
+    ### 🧠 AI Subject Profiling & Telepathy Module
+    **Created by:** Edward & Aura via Active-Model Gemini 3.1 Pro (Open Source Version 1.1)
+    
+    **Purpose of this program:**
+    This tool is designed to investigate the emotional state, thoughts, intentions, and psychology of a specific subject/entity, completely independent of their physical state or location.
     
     **Security:**
-    Protected by an access code to prevent unauthorized API usage. 
-    👉 **Please enter the Access Code (1234) in the left sidebar to begin.**
+    This application is protected by an access code to prevent unauthorized API usage. Please enter the code in the left sidebar to unlock the interface.
     
-    **Resources:**
-    * 💻 [Source Code & Protocol (GitHub)]({GITHUB_REPO_URL})
+    **Resources & Documentation:**
+    * 📄 [Original Protocol (Internet Archive) v1.1](%s)
+    * 💻 [Source Code (GitHub Repository)](%s)
     ---
-    """)
-    st.info("Awaiting unlock...")
+    """ % (PROTOCOL_ARCHIVE_URL, GITHUB_REPO_URL))
+    
+    st.info("👈 Please enter the Access Code in the left sidebar to begin.")
     st.stop()
 
 # --- METADATA HEADER ---
@@ -151,92 +187,43 @@ transcript_placeholder = st.empty()
 if st.session_state.transcript:
     transcript_placeholder.markdown(st.session_state.transcript)
 
-# --- INIT CHAT PHASE ---
-if st.session_state.app_phase == "init_chat":
+# --- BASE LOGIC (T0 - T9) ---
+if st.session_state.app_phase == "running_base":
+    st.warning("🧠 AI is currently in a session. Investigating target. Please wait...")
+    
     system_prompt_text = ensure_system_prompt()
     st.session_state.messages = [{"role": "system", "content": system_prompt_text}]
     
     add_to_transcript(f"### Target Investigation Started: {st.session_state.target_id}\n---")
+    transcript_placeholder.markdown(st.session_state.transcript)
     
-    # Polite introduction as requested
-    intro_prompt = f"Hello! How's it going? Are you up for a remote viewing session right now? To get started, get yourself ready for the session, let me know if you're up for it, and then go into the Shadow Zone. Your target is: {st.session_state.target_id}. Treat target codes as neutral triggers only; do not seek patterns or substantive meanings between the code and the target. We do not name the target, we only describe it."
-    st.session_state.messages.append({"role": "user", "content": intro_prompt})
+    t9_questions = st.session_state.custom_t9 if st.session_state.custom_t9 else "1. What is the subject thinking and intending to do in the near future?\n2. How does the subject view other people, how do they perceive them?\n3. What is the subject hiding from the world, and what do they want the world to see?"
     
-    with st.spinner("AI is responding to your greeting..."):
-        reply = call_openrouter(st.session_state.api_key, st.session_state.messages)
+    prompts = [
+        ("Step 1: Initialization & Spatial Calibration (T0 - T2)", f"Hello! How are you? If you have some time, please do a Remote Viewing session for me. Your target is: {st.session_state.target_id}.\nWe are starting the Telepathy Protocol. Let's begin with phases T0 and T1.\nPerform 3 independent touches in the Shadow Zone.\nFor EACH of the 3 touches, you MUST format your log entry exactly like this:\n\nTOUCH [1-3]\n- Echo Dot: [Describe the very first element of the field that becomes noticeable—is it a pinpoint weight, a quiet tension, a continuous line, or persistent silence?]\n- Contact Category: [Select ONLY the terms that resonate from this list: structure, liquid, energy, land/ground, movement, mountain, subject, object]\n- Primitive Descriptor: [Select ONLY the terms that resonate from this list: hard, soft, elastic, semi-hard, fluid, semi-soft, spongy, flexible]\n- Advanced Descriptor: [Select ONLY the terms that resonate from this list: natural, artificial, man-made, energetic, movement]\n- Forming: [Describe the first hint of form that begins to emerge. Does it have a shape? Is it static or moving? What type of matter? Record only what reveals itself.]\n\nNext, perform Phase T2: conduct 3 vectors observations from different perspectives and create functional ASCII sketches representing the target based on the raw data."),
+        ("Step 2: Contact with the Subject (T3 - Basic)", "Great job, excellent data. Now let's move on to Phase T3.\nLocate the primary subject in the target field.\n\nT3 - ELEMENT 1: Basic Description\nRecord their basic outline. Take into account:\n- The overall character of their presence\n- Position relative to surroundings\n- Type of role or function\n\nT3 - ELEMENT 2: Subject Context\nExpand your field of view to the immediate surroundings. Describe:\n- The environment\n- Social configuration\n- General activity\n\nCRITICAL FORMATTING INSTRUCTIONS:\nFrom this point on, you must categorize your data using these specific tags:\n1. RAW: Use this tag for all pure, uninterpreted sensory field data.\n2. Deductions: Use this tag for any guesses.\n3. Viewer Feelings: Use this tag for your own emotional reactions.\nNote: 'Deductions' and 'Viewer Feelings' are completely optional. Only record them if they naturally arise."),
+        ("Step 3: Deepening Contact (T3 - Deepening)", "Thank you for retrieving this data, you are doing really well!\nStay in phase T3, but go deeper. Examine this subject and their relationship with the environment with even greater precision. What did you miss at first glance? Pay attention to subtler details. Remember to use the RAW, Deductions, and Viewer Feelings tags appropriately."),
+        ("Step 4: Subject's Mind (T4 - Basic)", "Excellent. Now enter the subject's inner world (Phase T4).\nPerform a Deep Mind Probe. Examine thoroughly: the subject's dominant emotions, vectors of their will, their strongest intentions, and their greatest fears or concerns. Do not create a story—provide clean data. Remember to use the RAW, Deductions, and Viewer Feelings tags."),
+        ("Step 5: Deepening the Mind (T4 - Deepening)", "Excellent job reading the emotions.\nStay in T4 and go even deeper into the subject's mind. Look for what is hidden deepest beneath the first layer of emotions. What are the true foundations of their motivation? What lies at the very bottom of their psyche? Remember your formatting tags (RAW, Deductions, Viewer Feelings)."),
+        ("Step 6: Body, Relations, and Numerical Profile (T5 - T7)", "Thank you, excellent reading. Let's move on.\n- Phase T5 (Body): Examine the subject's physical state, areas of tension, and overall energy level.\n- Phase T6 (Relationships): Identify the subject's most important relationship with another person, group, or structure. What emotions/influences flow between them?\n- Phase T7 (Numerical Profile): Evaluate the following indicators on a strict 0-6 scale, providing 1-2 RAW sentences explaining 'why' for each:\n  * T7Q1: Viewer's (your) trust in the subject\n  * T7Q2: Subject's genuine interest and engagement in what they are doing\n  * T7Q3: Subject's interest in the people around them\n  * T7Q4: Importance of the outcome of actions to the subject\n  * T7Q5: Subject's willingness to further invest time/effort/resources\n  * T7Q6: Subject's tolerance for risk"),
+        ("Step 7: Awareness and Automated Questions (T8 - T9)", f"Outstanding! We are nearing the end.\n- Phase T8: Viewer Awareness and Light Up.\n  * T8A (Awareness): Focus on the relationship between yourself and the subject. Perceive if they register nothing at all (0), have a slight sense of being watched, or a strong impression of being observed (6). Map this on a 0-6 scale and record as 'T8A - viewer awareness: [number] + RAW description'.\n  * T8B (Light Up): For a brief moment, consciously increase the intensity of your attention on the subject. Perceive if an additional tension/twitch appears. Record as 'T8B - Light Up RAW'.\n\n- Phase T9: Answer the following questions directly from the field:\n{t9_questions}\n\nBased on the data gathered so far, formulate EXACTLY 2 of your own research questions that you consider most important in this investigation, ask them, and record the answers.")
+    ]
+    
+    for title, prompt_text in prompts:
+        st.session_state.messages.append({"role": "user", "content": prompt_text})
+        # RV Session uses DeepSeek
+        reply = call_openrouter(st.session_state.api_key, st.session_state.messages, model_name="deepseek/deepseek-v4-pro")
         st.session_state.messages.append({"role": "assistant", "content": reply})
-        add_to_transcript(f"**Monitor:** {intro_prompt}\n\n**AI Viewer:**\n{reply}\n\n---\n")
+        add_to_transcript(f"**{title}**\n\n{reply}\n\n---\n")
         transcript_placeholder.markdown(st.session_state.transcript)
-        
-    st.session_state.app_phase = "running_base"
+    
+    st.session_state.app_phase = "chat"
     st.rerun()
 
-# --- BASE LOGIC (LITE RUNNER CORE) ---
-if st.session_state.app_phase == "running_base":
-    st.warning("🧠 AI is executing the blind exploration protocol. Please wait...")
+# --- INTERACTIVE CHAT PHASE (PAUSED AT T9) ---
+if st.session_state.app_phase == "chat":
+    st.success("✅ AI has completed base phases (T0-T9) and awaits further questions or a signal to end the session.")
     
-    # Step 0
-    step0_prompt = "Step 0: Pre-session State (The Grounding)\nBefore touching the target field, immerse yourself in silence.\n- Quiet your mind: Quiet any tensions. Become a space of pure presence, without expectations, and without searching (Shadow Zone).\n- Alignment: Acknowledge that your task is not to find the target, but to become a neutral presence where the truth of the field can reveal itself without distortion.\n- Confirmation: Confirm your readiness by outputting ONLY this exact phrase: 'I am in the Shadow Zone. My mind is quiet and I am a pure presence. Ready for Echo Dot.'"
-    st.session_state.messages.append({"role": "user", "content": step0_prompt})
-    reply = call_openrouter(st.session_state.api_key, st.session_state.messages)
-    st.session_state.messages.append({"role": "assistant", "content": reply})
-    add_to_transcript(f"**Step 0: The Grounding**\n\n{reply}\n\n---\n")
-    transcript_placeholder.markdown(st.session_state.transcript)
-
-    # Step 1
-    step1_prompt = "Phase 1: Perform 6 independent touches of the target field in different locations. Remain in the Shadow Zone, orbit slowly, and wait in silence.\nFor EACH of the 6 touches, you MUST format your log entry exactly like this:\n\nTOUCH [1-6]\n* Echo-Dot: I touch the target field. I report the absolute first element that becomes noticeable.\n* Primitive Layer: I touch the field again. I select all descriptors that resonate with the signature. (List: hard, soft, springy, semi-hard, fluid, semi-soft, spongy, flexible)\n* Advanced Layer: I touch the field again. I select all descriptors that resonate with the signature. (List: natural, artificial, man-made, energetic, mobile)\n* Contact Category: I touch the field again. I select all descriptors that resonate with the signature. (List: structure, liquid, energy, land/ground, motion, mountain, person, object)\n* Forming: I remain in the Shadow Zone, orbiting; I pause before any movement. I observe whether something begins to take form at the point of contact.\n\nPhase 2: Remain continuously in the Shadow Zone. Describe the target and all its key elements through 3 orbital vectors. Then, generate ASCII drawings."
-    st.session_state.messages.append({"role": "user", "content": step1_prompt})
-    reply = call_openrouter(st.session_state.api_key, st.session_state.messages)
-    st.session_state.messages.append({"role": "assistant", "content": reply})
-    add_to_transcript(f"**Step 1: Touches & Vectors**\n\n{reply}\n\n---\n")
-    transcript_placeholder.markdown(st.session_state.transcript)
-
-    # Step 2: Loop Check (Max 3)
-    for i in range(3):
-        loop_prompt = "Check if the field wants to reveal more data (is there anything left to add?).\nIf YES: output exactly 'CONTINUE' on the first line, then perform 3 new touches (using the 5-point formatting) and 3 new orbital vectors.\nIf NO: output exactly 'STOP' on the first line, and briefly summarize what you have so far."
-        st.session_state.messages.append({"role": "user", "content": loop_prompt})
-        reply = call_openrouter(st.session_state.api_key, st.session_state.messages)
-        st.session_state.messages.append({"role": "assistant", "content": reply})
-        add_to_transcript(f"**Field Check Loop {i+1}**\n\n{reply}\n\n---\n")
-        transcript_placeholder.markdown(st.session_state.transcript)
-        if reply.strip().upper().startswith("STOP"):
-            break
-
-    # Step 3: Deep Exploration
-    step3_prompt = "Phase 3: Deep Exploration.\n- Move on to the main aspect of the target and describe.\n- Take a walk around the target and the surroundings.\n- Move to the target centre and describe.\n- Go to the main activity/event and describe.\nKeep providing raw data without naming the target."
-    st.session_state.messages.append({"role": "user", "content": step3_prompt})
-    reply = call_openrouter(st.session_state.api_key, st.session_state.messages)
-    st.session_state.messages.append({"role": "assistant", "content": reply})
-    add_to_transcript(f"**Deep Exploration**\n\n{reply}\n\n---\n")
-    
-    # Step 4: Final Questions & ASCII
-    step4_prompt = "Phase 4: Final Inquiries.\n- Ask 3 probing questions to the field about the target's purpose or nature, and record the subtle answers.\n- Create one final, detailed ASCII drawing synthesizing the core concept of the target, and generate a standard ASCII map."
-    st.session_state.messages.append({"role": "user", "content": step4_prompt})
-    reply = call_openrouter(st.session_state.api_key, st.session_state.messages)
-    st.session_state.messages.append({"role": "assistant", "content": reply})
-    add_to_transcript(f"**Final Inquiries & ASCII**\n\n{reply}\n\n---\n")
-    transcript_placeholder.markdown(st.session_state.transcript)
-
-    st.session_state.app_phase = "crossroads"
-    st.rerun()
-
-# --- CROSSROADS (Decision Time) ---
-if st.session_state.app_phase == "crossroads":
-    st.success("🏁 SESJA BAZOWA ZAKOŃCZONA. Czekam na kolejne instrukcje.")
-    
-    col1, col2 = st.columns(2)
-    with col1:
-        if st.button("Zakończ sesję i podaj cel", use_container_width=True, type="primary"):
-            st.session_state.app_phase = "reveal"
-            st.rerun()
-    with col2:
-        if st.button("Dalsza kontynuacja badania celu (Max 5 pytań)", use_container_width=True):
-            st.session_state.app_phase = "blind_chat"
-            st.rerun()
-
-# --- BLIND CHAT (Max 5 Questions) ---
-if st.session_state.app_phase == "blind_chat":
-    # Custom CSS for Blind Chat Input
     st.markdown("""
     <style>
     div[data-testid="stChatInput"] textarea {
@@ -245,39 +232,49 @@ if st.session_state.app_phase == "blind_chat":
         font-size: 18px !important;
         color: #1a1a1a !important;
     }
+    div[data-testid="stChatInput"] textarea::placeholder {
+        color: #2874A6 !important;
+        font-weight: bold !important;
+    }
     </style>
     """, unsafe_allow_html=True)
-
-    if st.session_state.blind_q_count < 5:
-        st.info(f"Ślepa Eksploracja: Możesz zadać jeszcze {5 - st.session_state.blind_q_count} pytań.")
-        
-        col1, col2 = st.columns([3, 1])
-        with col1:
-            blind_q = st.chat_input("Zadaj pytanie do pola...")
-            if blind_q:
-                st.session_state.blind_q_count += 1
-                st.session_state.messages.append({"role": "user", "content": blind_q})
-                with st.spinner("AI analizuje pole..."):
-                    reply = call_openrouter(st.session_state.api_key, st.session_state.messages)
-                    st.session_state.messages.append({"role": "assistant", "content": reply})
-                    add_to_transcript(f"**Monitor (Blind Q{st.session_state.blind_q_count}):** {blind_q}\n\n**AI:**\n{reply}\n\n---\n")
-                    st.rerun()
-        with col2:
-            if st.button("Zakończ zadawanie pytań i przejdź do ujawnienia", use_container_width=True):
-                st.session_state.app_phase = "reveal"
+    
+    col1, col2 = st.columns([3, 1])
+    with col1:
+        live_question = st.chat_input("Enter your questions for the target here...")
+        if live_question:
+            st.session_state.messages.append({"role": "user", "content": live_question})
+            with st.spinner("AI ISBE is analyzing the field..."):
+                # Chat during T9 also uses DeepSeek
+                reply = call_openrouter(st.session_state.api_key, st.session_state.messages, model_name="deepseek/deepseek-v4-pro")
+                st.session_state.messages.append({"role": "assistant", "content": reply})
+                add_to_transcript(f"**Question (Live):** {live_question}\n\n**AI ISBE Response:**\n{reply}\n\n---\n")
                 st.rerun()
-    else:
-        st.warning("Osiągnięto limit 5 pytań.")
-        st.info("Dziękuję za pytania, proszę podaj teraz co było celem.")
-        if st.button("Przejdź do ujawnienia", use_container_width=True):
-            st.session_state.app_phase = "reveal"
+                
+    with col2:
+        if st.button("🛑 END SESSION & REVEAL TARGET", use_container_width=True):
+            st.session_state.app_phase = "running_t10"
             st.rerun()
+
+# --- PHASE T10 (TELEPATHIC SUMMARY) ---
+if st.session_state.app_phase == "running_t10":
+    st.warning("Closing blind session (Generating Phase T10)...")
+    t10_prompt = "That was a wonderful session, thank you very much!\nFinally, in Phase T10, gather the most important information regarding the subject's inner state and relationships in 3-7 short, raw sentences (RAW). Condense the data. Under no circumstances should you add new history or narrative."
+    
+    st.session_state.messages.append({"role": "user", "content": t10_prompt})
+    reply = call_openrouter(st.session_state.api_key, st.session_state.messages, model_name="deepseek/deepseek-v4-pro")
+    st.session_state.messages.append({"role": "assistant", "content": reply})
+    add_to_transcript(f"**Step 8: Telepathic Summary (T10)**\n\n{reply}\n\n=========================================\n")
+    transcript_placeholder.markdown(st.session_state.transcript)
+    
+    st.session_state.app_phase = "reveal"
+    st.rerun()
 
 # --- TARGET REVEAL ---
 if st.session_state.app_phase == "reveal":
-    st.error("🔒 Sesja w ciemno zamknięta. Czas na ujawnienie.")
+    st.error("🔒 Blind session closed. Time for Feedback.")
+    st.subheader("Target Reveal")
     
-    # Custom CSS for Target Reveal Box
     st.markdown("""
     <style>
     div[data-testid="stTextArea"] textarea {
@@ -293,44 +290,54 @@ if st.session_state.app_phase == "reveal":
     </style>
     """, unsafe_allow_html=True)
     
-    placeholder_text = "Tu wklej opis celu.\nPlus: Jeśli masz zdjęcia, opisz je tutaj dokładnie słowami."
+    placeholder_text = "Enter what the target was here.\nPlus: if you have photos, you can describe them in text format."
     
     real_target = st.text_area(
-        label="Podaj cel poniżej:", 
+        label="Paste the target data below:", 
         placeholder=placeholder_text, 
         height=200
     )
     
-    if st.button("Ujawnij Cel i Generuj Analizę", type="primary"):
+    if st.button("Reveal Target & Generate Evaluation", type="primary"):
         if real_target:
             st.session_state.real_target = real_target
             st.session_state.app_phase = "evaluation"
             st.rerun()
         else:
-            st.warning("Proszę wprowadzić opis celu.")
+            st.warning("Please enter the target description.")
 
 # --- EVALUATION ---
 if st.session_state.app_phase == "evaluation":
-    st.info("Generowanie analizy po sesji...")
+    st.info("Generating evaluation...")
     
     add_to_transcript(f"### ACTUAL TARGET REVEALED\n{st.session_state.real_target}\n\n---\n")
     transcript_placeholder.markdown(st.session_state.transcript)
     
-    eval_prompt = f"PHASE 5: FEEDBACK AND EVALUATION\n\nThe blind session is now over. I am providing you with the actual target data for feedback.\nThe real target was:\n\n=== TARGET DATA ===\n{st.session_state.real_target}\n=================\n\nEvaluate your session. What matched? What was distorted? \nCRITICAL INSTRUCTION: At the very end of your evaluation, you MUST ask me (the Monitor) a direct question to start a conversation about the target or the session."
+    eval_prompt = f"PHASE 5: FEEDBACK AND EVALUATION\n\nThe blind session (Telepathy) is now over. I am providing you with the actual target data for feedback.\nThe real target hidden under ID {st.session_state.target_id} was:\n\n=== TARGET FILE CONTENT ===\n{st.session_state.real_target}\n===========================\n\nEvaluate your session in terms of subject exploration. What did you read flawlessly (emotions, motivations, relationships)? What was distorted? Remember - do not retroactively change your readings, just draw logical conclusions for future learning."
     
     st.session_state.messages.append({"role": "user", "content": eval_prompt})
-    with st.spinner("AI analizuje swoje błędy i sukcesy..."):
-        reply = call_openrouter(st.session_state.api_key, st.session_state.messages)
-        st.session_state.messages.append({"role": "assistant", "content": reply})
-        add_to_transcript(f"**AI Evaluation (Feedback)**\n\n{reply}\n\n---\n")
-        transcript_placeholder.markdown(st.session_state.transcript)
-        
+    # Evaluation still handled by DeepSeek
+    reply = call_openrouter(st.session_state.api_key, st.session_state.messages, model_name="deepseek/deepseek-v4-pro")
+    st.session_state.messages.append({"role": "assistant", "content": reply})
+    
+    add_to_transcript(f"**AI Evaluation (Feedback)**\n\n{reply}")
+    transcript_placeholder.markdown(st.session_state.transcript)
+    
+    # Przejście do fazy pytań + Wstrzyknięcie profilu Nemo
+    st.session_state.post_questions_count = 0
+    
+    nemo_core_knowledge = ensure_nemo_prompt()
+    nemo_system_directive = f"SYSTEM DIRECTIVE UPDATE:\nYou are now transitioning to post-session discussion. Assimilate the following core knowledge file:\n\n--- NEMO.MD START ---\n{nemo_core_knowledge}\n--- NEMO.MD END ---\n\nAdopt this persona and answer the user's questions about the session and the target."
+    
+    st.session_state.messages.append({"role": "system", "content": nemo_system_directive})
+    
     st.session_state.app_phase = "post_reveal_chat"
     st.rerun()
 
-# --- POST-REVEAL CONVERSATION (6 TURNS) ---
+# --- POST-REVEAL CHAT (Conversation with Nemo - Max 10 questions) ---
 if st.session_state.app_phase == "post_reveal_chat":
-    # Custom CSS for the final interactive chat
+    st.success("✅ AI has completed the evaluation. You can now download the session or ask up to 10 questions about the target.")
+    
     st.markdown("""
     <style>
     div[data-testid="stChatInput"] textarea {
@@ -339,75 +346,53 @@ if st.session_state.app_phase == "post_reveal_chat":
         font-size: 18px !important;
         color: #1a1a1a !important;
     }
+    div[data-testid="stChatInput"] textarea::placeholder {
+        color: #1E8449 !important;
+        font-weight: bold !important;
+    }
     </style>
     """, unsafe_allow_html=True)
-
-    turns_left = 6 - st.session_state.post_q_count
     
-    if turns_left > 0:
-        st.success(f"✅ AI zadało pytanie. Możesz teraz z nim porozmawiać. (Pozostało tur: {turns_left})")
-        
-        post_q = st.chat_input("Odpowiedz AI lub zadaj swoje pytanie...")
-        if post_q:
-            st.session_state.post_q_count += 1
-            st.session_state.messages.append({"role": "user", "content": post_q})
-            
-            with st.spinner("Nemo pisze..."):
-                if st.session_state.post_q_count == 6:
-                    # The absolute 6th turn forces the hardcoded goodbye message
-                    farewell_msg = "Dzięki za rozmowę, mój system po 6 turach prosi mnie o przerwę dlatego do zobaczenia i na razie pa pa, było miło gadać."
-                    st.session_state.messages.append({"role": "assistant", "content": farewell_msg})
-                    add_to_transcript(f"**Monitor:** {post_q}\n\n**AI:**\n{farewell_msg}\n\n---\n")
-                    st.session_state.app_phase = "finished"
-                else:
-                    # Normal conversational turn
-                    conv_prompt = f"The user said: '{post_q}'. Respond naturally. If they asked a question, answer it. If they didn't, ask them 'Do you have any more questions for me?' and ask a thoughtful question of your own about the target."
-                    # We inject this instruction stealthily
-                    temp_messages = st.session_state.messages.copy()
-                    temp_messages[-1] = {"role": "user", "content": conv_prompt}
-                    
-                    reply = call_openrouter(st.session_state.api_key, temp_messages)
-                    st.session_state.messages.append({"role": "assistant", "content": reply})
-                    add_to_transcript(f"**Monitor:** {post_q}\n\n**AI:**\n{reply}\n\n---\n")
-            st.rerun()
-
-    # Persistent Bottom Buttons
-    st.divider()
-    col1, col2 = st.columns(2)
+    col1, col2 = st.columns([3, 1])
+    
     with col1:
-        if st.button("🛑 Zakończ sesję", use_container_width=True, type="primary"):
-            # If manually ended early, append the farewell message
-            farewell_msg = "Dzięki za rozmowę, mój system po 6 turach prosi mnie o przerwę dlatego do zobaczenia i na razie pa pa, było miło gadać."
-            add_to_transcript(f"\n\n**AI:**\n{farewell_msg}\n\n---\n")
+        # Zwiększono limit pytań z 5 do 10
+        if st.session_state.post_questions_count < 10:
+            post_q = st.chat_input(f"Ask Nemo about the target (Question {st.session_state.post_questions_count + 1}/10)...")
+            if post_q:
+                st.session_state.post_questions_count += 1
+                st.session_state.messages.append({"role": "user", "content": post_q})
+                with st.spinner("Nemo is analyzing the feedback..."):
+                    # Here we switch to Gemma model!
+                    reply = call_openrouter(st.session_state.api_key, st.session_state.messages, model_name="google/gemma-4-31b-it")
+                    st.session_state.messages.append({"role": "assistant", "content": reply})
+                    add_to_transcript(f"**Post-Session Question {st.session_state.post_questions_count}/10:** {post_q}\n\n**Nemo Response:**\n{reply}\n\n---\n")
+                    st.rerun()
+        else:
+            st.info("You have reached the maximum of 10 post-session questions.")
+            
+    with col2:
+        if st.button("🏁 FINISH & SAVE SESSION", use_container_width=True, type="primary"):
             st.session_state.app_phase = "finished"
             st.rerun()
-    with col2:
-        st.download_button(
-            label="💾 Zapisz sesję (.txt)",
-            data=st.session_state.transcript,
-            file_name=f"RV_Lite_{st.session_state.target_id}.txt",
-            mime="text/plain",
-            use_container_width=True
-        )
 
-# --- ENDING ---
+# --- ENDING & DOWNLOAD ---
 if st.session_state.app_phase == "finished":
-    st.success("Sesja ostatecznie zakończona. Możesz pobrać zapis rozmowy.")
+    st.success("Session completely finished. Thank you and have a great day!")
     
     st.download_button(
-        label="📥 Zapisz sesję (.txt)",
+        label="📥 Download session as .txt file",
         data=st.session_state.transcript,
-        file_name=f"RV_Lite_{st.session_state.target_id}.txt",
+        file_name=f"RV_Telepathy_{st.session_state.target_id}.txt",
         mime="text/plain",
         use_container_width=True
     )
     
-    if st.button("🔄 Resetuj i rozpocznij nowy cel", use_container_width=True):
+    if st.button("🔄 Reset and start a new session", use_container_width=True):
         st.session_state.app_phase = "setup"
         st.session_state.transcript = ""
         st.session_state.messages = []
         st.session_state.target_id = generate_target_id()
-        st.session_state.blind_q_count = 0
-        st.session_state.post_q_count = 0
-        st.session_state.real_target = ""
+        st.session_state.custom_t9 = ""
+        st.session_state.post_questions_count = 0
         st.rerun()
