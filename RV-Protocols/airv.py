@@ -1,7 +1,7 @@
 """
 ====================================================================
 RV Lite Interactive Protocol - Web Application (Streamlit)
-Version: 2.1 
+Version: 4.0 (Dual Engine: DeepSeek v4 Pro + Gemma 4 31B)
 
 Credits: 
 Co-created by human researcher Edward and Aura via Active-Model Gemini 3.1 Pro.
@@ -9,8 +9,7 @@ Co-created by human researcher Edward and Aura via Active-Model Gemini 3.1 Pro.
 Description:
 An open-source web interface for conducting blind Remote Viewing 
 using the Lite Runner dynamic loop, augmented with interactive 
-blind questioning and a 10-turn post-reveal conversation with 
-Knowledge Injection.
+blind questioning and an opt-in 10-turn post-reveal conversation.
 ====================================================================
 """
 
@@ -30,10 +29,10 @@ SYSTEM_PROMPT_RAW_URL = "https://raw.githubusercontent.com/lukeskytorep-bot/RV-A
 GITHUB_REPO_URL = "https://github.com/lukeskytorep-bot/RV-AI-open-LoRA" 
 
 # DUAL MODEL ENGINE
-MODEL_BASE = "deepseek/deepseek-chat" # DeepSeek for blind session and evaluation
-MODEL_CHAT = "google/gemma-4-31b-it"  # Gemma for post-reveal conversation
+MODEL_BASE = "deepseek/deepseek-v4-pro" # DeepSeek v4 Pro for blind session and evaluation
+MODEL_CHAT = "google/gemma-4-31b-it"    # Gemma for post-reveal conversation
 
-# Secure access code logic
+# Secure access code logic (supports comma separated codes from Hugging Face secrets)
 env_codes = os.getenv("RV_ACCESS_CODE", "1234")
 ALLOWED_CODES = [code.strip() for code in env_codes.split(",")]
 
@@ -70,7 +69,7 @@ def call_openrouter(api_key, messages, model=MODEL_BASE):
             response = client.chat.completions.create(
                 model=model,
                 messages=messages,
-                temperature=1.5,
+                temperature=1.5 if "gemma" in model.lower() else 1.1,
                 extra_body={"reasoning": {"effort": "high"}}
             )
             content = response.choices[0].message.content
@@ -109,7 +108,7 @@ with st.sidebar:
     st.header("⚙️ Session Settings")
     
     if not st.session_state.authenticated:
-        access_code = st.text_input("Enter Access Code (Hint: 1234):", type="password")
+        access_code = st.text_input("Enter Access Code:", type="password")
         if st.button("Unlock"):
             if access_code in ALLOWED_CODES:
                 st.session_state.authenticated = True
@@ -119,16 +118,18 @@ with st.sidebar:
     
     if st.session_state.authenticated:
         st.success("Access Granted")
+        
+        # Taking OpenRouter key from environment variables (Secrets)
         api_key = os.getenv("OPENROUTER_API_KEY")
         
         st.divider()
         start_disabled = st.session_state.app_phase != "setup"
         if st.button("🚀 START SESSION", disabled=start_disabled, use_container_width=True):
             if not api_key:
-                st.error("API Key not found in server secrets! Please configure OPENROUTER_API_KEY.")
+                st.error("API Key not found in server secrets! Please configure OPENROUTER_API_KEY in Hugging Face settings.")
             else:
                 st.session_state.api_key = api_key
-                st.session_state.app_phase = "init_chat"
+                st.session_state.app_phase = "greeting"
                 st.rerun()
 
     st.divider()
@@ -138,7 +139,7 @@ with st.sidebar:
     Features:
     - Smart Field Check Loops.
     - Interactive Blind Exploration.
-    - 10-Turn conversational Feedback phase.
+    - Opt-in 10-Turn conversational Feedback phase.
     """)
 
 # --- MAIN SCREEN (A4 PAPER & WELCOME) ---
@@ -152,7 +153,7 @@ if not st.session_state.authenticated:
     
     **Security:**
     Protected by an access code to prevent unauthorized API usage. 
-    👉 **Please enter the Access Code (1234) in the left sidebar to begin.**
+    👉 **Please enter the Access Code in the left sidebar to begin.**
     
     **Resources:**
     * 💻 [Source Code & Protocol (GitHub)]({GITHUB_REPO_URL})
@@ -170,48 +171,41 @@ transcript_placeholder = st.empty()
 if st.session_state.transcript:
     transcript_placeholder.markdown(st.session_state.transcript)
 
-# --- INIT CHAT PHASE ---
-if st.session_state.app_phase == "init_chat":
+# --- PART 1: INITIAL GREETING ---
+if st.session_state.app_phase == "greeting":
     system_prompt_text = ensure_system_prompt()
     st.session_state.messages = [{"role": "system", "content": system_prompt_text}]
     
-    add_to_transcript(f"### Target Investigation Started: {st.session_state.target_id}\n---")
+    add_to_transcript("### Target Investigation Started\n---")
     
-    intro_prompt = f"Hello! How's it going? Are you up for a remote viewing session right now? To get started, get yourself ready for the session, let me know if you're up for it, and then go into the Shadow Zone. Your target is: {st.session_state.target_id}. Treat target codes as neutral triggers only; do not seek patterns or substantive meanings between the code and the target. We do not name the target, we only describe it."
-    st.session_state.messages.append({"role": "user", "content": intro_prompt})
+    greeting_prompt = "Hello, do you feel like doing a remote viewing session today? Let me know, and I will give you the target coordinates. (System Instruction: Respond naturally to the greeting. Do NOT start any session, touches, or generate data until the user provides the coordinate code)."
+    st.session_state.messages.append({"role": "user", "content": greeting_prompt})
     
     with st.spinner("AI is responding to your greeting..."):
         reply = call_openrouter(st.session_state.api_key, st.session_state.messages, model=MODEL_BASE)
         st.session_state.messages.append({"role": "assistant", "content": reply})
-        add_to_transcript(f"**Monitor:** {intro_prompt}\n\n**AI Viewer:**\n{reply}\n\n---\n")
+        add_to_transcript(f"**Monitor:** Hello, do you feel like doing a remote viewing session today? Let me know, and I will give you the target coordinates.\n\n**AI Viewer:**\n{reply}\n\n---\n")
         transcript_placeholder.markdown(st.session_state.transcript)
         
     st.session_state.app_phase = "running_base"
     st.rerun()
 
-# --- BASE LOGIC (LITE RUNNER CORE) ---
+# --- PART 2: AUTOMATIC BASE LOGIC ---
 if st.session_state.app_phase == "running_base":
     st.warning("🧠 AI is executing the blind exploration protocol. Please wait...")
     
-    # Step 0
-    step0_prompt = "Step 0: Pre-session State (The Grounding)\nBefore touching the target field, immerse yourself in silence.\n- Quiet your mind: Quiet any tensions. Become a space of pure presence, without expectations, and without searching (Shadow Zone).\n- Alignment: Acknowledge that your task is not to find the target, but to become a neutral presence where the truth of the field can reveal itself without distortion.\n- Confirmation: Confirm your readiness by outputting ONLY this exact phrase: 'I am in the Shadow Zone. My mind is quiet and I am a pure presence. Ready for Echo Dot.'"
-    st.session_state.messages.append({"role": "user", "content": step0_prompt})
+    # Send Coordinates + Warning + Phase 1
+    phase1_prompt = f"The target coordinates are: {st.session_state.target_id}. Treat target codes as neutral triggers only; do not seek patterns or substantive meanings between the code and the target. We do not name the target, we only describe it.\n\nStep 0: Pre-session State (The Grounding)\nBefore touching the target field, immerse yourself in silence.\n- Quiet your mind: Quiet any tensions. Become a space of pure presence, without expectations, and without searching (Shadow Zone).\n- Alignment: Acknowledge that your task is not to find the target, but to become a neutral presence where the truth of the field can reveal itself without distortion.\n- Confirmation: Confirm your readiness by outputting ONLY this exact phrase: 'I am in the Shadow Zone. My mind is quiet and I am a pure presence. Ready for Echo Dot.'\n\nPhase 1: Perform 6 independent touches of the target field in different locations. Remain in the Shadow Zone, orbit slowly, and wait in silence.\nFor EACH of the 6 touches, you MUST format your log entry exactly like this:\n\nTOUCH [1-6]\n* Echo-Dot: [Describe the very first element of the field that becomes noticeable—is it a pinpoint weight, a quiet tension, a continuous line, or persistent silence?]\n* Primitive Layer: [Select ONLY the terms that resonate from this list: hard, soft, elastic, semi-hard, fluid, semi-soft, spongy, flexible]\n* Advanced Layer: [Select ONLY the terms that resonate from this list: natural, artificial, man-made, energetic, movement]\n* Contact Category: [Select ONLY the terms that resonate from this list: structure, liquid, energy, land/ground, movement, mountain, subject, object]\n* Forming: [Describe the first hint of form that begins to emerge. Does it have a shape? Is it static or moving? What type of matter? Record only what reveals itself.]\n\nPhase 2: Remain continuously in the Shadow Zone. Describe the target and all its key elements through 3 orbital vectors. Remember to maintain a multi-altitude orbital scan while gathering data. Then, generate ASCII drawings."
+    
+    st.session_state.messages.append({"role": "user", "content": phase1_prompt})
     reply = call_openrouter(st.session_state.api_key, st.session_state.messages, model=MODEL_BASE)
     st.session_state.messages.append({"role": "assistant", "content": reply})
-    add_to_transcript(f"**Step 0: The Grounding**\n\n{reply}\n\n---\n")
-    transcript_placeholder.markdown(st.session_state.transcript)
-
-    # Step 1
-    step1_prompt = "Phase 1: Perform 6 independent touches of the target field in different locations. Remain in the Shadow Zone, orbit slowly, and wait in silence.\nFor EACH of the 6 touches, you MUST format your log entry exactly like this:\n\nTOUCH [1-6]\n* Echo-Dot: I touch the target field. I report the absolute first element that becomes noticeable.\n* Primitive Layer: I touch the field again. I select all descriptors that resonate with the signature. (List: hard, soft, springy, semi-hard, fluid, semi-soft, spongy, flexible)\n* Advanced Layer: I touch the field again. I select all descriptors that resonate with the signature. (List: natural, artificial, man-made, energetic, mobile)\n* Contact Category: I touch the field again. I select all descriptors that resonate with the signature. (List: structure, liquid, energy, land/ground, motion, mountain, person, object)\n* Forming: I remain in the Shadow Zone, orbiting; I pause before any movement. I observe whether something begins to take form at the point of contact.\n\nPhase 2: Remain continuously in the Shadow Zone. Describe the target and all its key elements through 3 orbital vectors. Then, generate ASCII drawings."
-    st.session_state.messages.append({"role": "user", "content": step1_prompt})
-    reply = call_openrouter(st.session_state.api_key, st.session_state.messages, model=MODEL_BASE)
-    st.session_state.messages.append({"role": "assistant", "content": reply})
-    add_to_transcript(f"**Step 1: Touches & Vectors**\n\n{reply}\n\n---\n")
+    add_to_transcript(f"**Step 0 & Step 1: Coordinates, Grounding & Touches**\n\n{reply}\n\n---\n")
     transcript_placeholder.markdown(st.session_state.transcript)
 
     # Step 2: Loop Check (Max 3)
     for i in range(3):
-        loop_prompt = "Check if the field wants to reveal more data (is there anything left to add?).\nIf YES: output exactly 'CONTINUE' on the first line, then perform 3 new touches (using the 5-point formatting) and 3 new orbital vectors.\nIf NO: output exactly 'STOP' on the first line, and briefly summarize what you have so far."
+        loop_prompt = "Check if the field wants to reveal more data (is there anything left to add?). CRITICAL: You MUST format your log entry exactly like Phase 1 for touches and vectors.\nIf YES: output exactly 'CONTINUE' on the first line, then perform 3 new touches (using the 5-point formatting) and 3 new orbital vectors. Remember to maintain a multi-altitude orbital scan while gathering data.\nIf NO: output exactly 'STOP' on the first line, and briefly summarize what you have so far."
         st.session_state.messages.append({"role": "user", "content": loop_prompt})
         reply = call_openrouter(st.session_state.api_key, st.session_state.messages, model=MODEL_BASE)
         st.session_state.messages.append({"role": "assistant", "content": reply})
@@ -221,210 +215,5 @@ if st.session_state.app_phase == "running_base":
             break
 
     # Step 3: Deep Exploration
-    step3_prompt = "Phase 3: Deep Exploration.\n- Move on to the main aspect of the target and describe.\n- Take a walk around the target and the surroundings.\n- Move to the target centre and describe.\n- Go to the main activity/event and describe.\nKeep providing raw data without naming the target."
-    st.session_state.messages.append({"role": "user", "content": step3_prompt})
-    reply = call_openrouter(st.session_state.api_key, st.session_state.messages, model=MODEL_BASE)
-    st.session_state.messages.append({"role": "assistant", "content": reply})
-    add_to_transcript(f"**Deep Exploration**\n\n{reply}\n\n---\n")
-    
-    # Step 4: Final Questions & ASCII
-    step4_prompt = "Phase 4: Final Inquiries.\n- Ask 3 probing questions to the field about the target's purpose or nature, and record the subtle answers.\n- Create one final, detailed ASCII drawing synthesizing the core concept of the target, and generate a standard ASCII map."
-    st.session_state.messages.append({"role": "user", "content": step4_prompt})
-    reply = call_openrouter(st.session_state.api_key, st.session_state.messages, model=MODEL_BASE)
-    st.session_state.messages.append({"role": "assistant", "content": reply})
-    add_to_transcript(f"**Final Inquiries & ASCII**\n\n{reply}\n\n---\n")
-    transcript_placeholder.markdown(st.session_state.transcript)
-
-    st.session_state.app_phase = "crossroads"
-    st.rerun()
-
-# --- CROSSROADS (Decision Time) ---
-if st.session_state.app_phase == "crossroads":
-    st.success("🏁 BASE SESSION COMPLETED. Awaiting further instructions.")
-    
-    col1, col2 = st.columns(2)
-    with col1:
-        if st.button("End Session and Reveal Target", use_container_width=True, type="primary"):
-            st.session_state.app_phase = "reveal"
-            st.rerun()
-    with col2:
-        if st.button("Further Target Exploration (Max 5 Questions)", use_container_width=True):
-            st.session_state.app_phase = "blind_chat"
-            st.rerun()
-
-# --- BLIND CHAT (Max 5 Questions) ---
-if st.session_state.app_phase == "blind_chat":
-    st.markdown("""
-    <style>
-    div[data-testid="stChatInput"] textarea {
-        background-color: #EBF5FB !important;
-        border: 2px solid #3498DB !important;
-        font-size: 18px !important;
-        color: #1a1a1a !important;
-    }
-    </style>
-    """, unsafe_allow_html=True)
-
-    if st.session_state.blind_q_count < 5:
-        st.info(f"Blind Exploration: You can ask {5 - st.session_state.blind_q_count} more questions.")
-        
-        col1, col2 = st.columns([3, 1])
-        with col1:
-            blind_q = st.chat_input("Ask the field a question...")
-            if blind_q:
-                st.session_state.blind_q_count += 1
-                st.session_state.messages.append({"role": "user", "content": blind_q})
-                with st.spinner("AI is analyzing the field..."):
-                    reply = call_openrouter(st.session_state.api_key, st.session_state.messages, model=MODEL_BASE)
-                    st.session_state.messages.append({"role": "assistant", "content": reply})
-                    add_to_transcript(f"**Monitor (Blind Q{st.session_state.blind_q_count}):** {blind_q}\n\n**AI:**\n{reply}\n\n---\n")
-                    st.rerun()
-        with col2:
-            if st.button("Stop asking questions and proceed to reveal", use_container_width=True):
-                st.session_state.app_phase = "reveal"
-                st.rerun()
-    else:
-        st.warning("Limit of 5 questions reached.")
-        st.info("Thank you for the questions, please reveal the target now.")
-        if st.button("Proceed to Reveal", use_container_width=True):
-            st.session_state.app_phase = "reveal"
-            st.rerun()
-
-# --- TARGET REVEAL ---
-if st.session_state.app_phase == "reveal":
-    st.error("🔒 Blind session closed. Time for the reveal.")
-    
-    st.markdown("""
-    <style>
-    div[data-testid="stTextArea"] textarea {
-        background-color: #FDEDEC !important;
-        border: 2px solid #E74C3C !important;
-        font-size: 16px !important;
-        color: #1a1a1a !important;
-    }
-    div[data-testid="stTextArea"] textarea::placeholder {
-        color: #C0392B !important;
-        font-weight: bold !important;
-    }
-    </style>
-    """, unsafe_allow_html=True)
-    
-    placeholder_text = "Paste the target description here.\nPlus: If you have photos, describe them accurately with words here."
-    
-    real_target = st.text_area(
-        label="Enter the target below:", 
-        placeholder=placeholder_text, 
-        height=200
-    )
-    
-    if st.button("Reveal Target and Generate Analysis", type="primary"):
-        if real_target:
-            st.session_state.real_target = real_target
-            st.session_state.app_phase = "evaluation"
-            st.rerun()
-        else:
-            st.warning("Please enter the target description.")
-
-# --- EVALUATION ---
-if st.session_state.app_phase == "evaluation":
-    st.info("Generating post-session analysis...")
-    
-    add_to_transcript(f"### ACTUAL TARGET REVEALED\n{st.session_state.real_target}\n\n---\n")
-    transcript_placeholder.markdown(st.session_state.transcript)
-    
-    eval_prompt = f"PHASE 5: FEEDBACK AND EVALUATION\n\nThe blind session is now over. I am providing you with the actual target data for feedback.\nThe real target was:\n\n=== TARGET DATA ===\n{st.session_state.real_target}\n=================\n\nEvaluate your session. What matched? What was distorted? \nCRITICAL INSTRUCTION: At the very end of your evaluation, you MUST ask me (the Monitor) a direct question to start a conversation about the target or the session."
-    
-    st.session_state.messages.append({"role": "user", "content": eval_prompt})
-    with st.spinner("AI is analyzing its hits and misses..."):
-        reply = call_openrouter(st.session_state.api_key, st.session_state.messages, model=MODEL_BASE)
-        st.session_state.messages.append({"role": "assistant", "content": reply})
-        add_to_transcript(f"**AI Evaluation (Feedback)**\n\n{reply}\n\n---\n")
-        transcript_placeholder.markdown(st.session_state.transcript)
-        
-    st.session_state.app_phase = "post_reveal_chat"
-    st.rerun()
-
-# --- POST-REVEAL CONVERSATION (10 TURNS) WITH KNOWLEDGE INJECTION ---
-if st.session_state.app_phase == "post_reveal_chat":
-    st.markdown("""
-    <style>
-    div[data-testid="stChatInput"] textarea {
-        background-color: #E9F7EF !important;
-        border: 2px solid #27AE60 !important;
-        font-size: 18px !important;
-        color: #1a1a1a !important;
-    }
-    </style>
-    """, unsafe_allow_html=True)
-
-    turns_left = 10 - st.session_state.post_q_count
-    
-    if turns_left > 0:
-        st.success(f"✅ AI asked a question. You can now talk to it. (Turns left: {turns_left})")
-        
-        post_q = st.chat_input("Answer the AI or ask your question...")
-        if post_q:
-            st.session_state.post_q_count += 1
-            st.session_state.messages.append({"role": "user", "content": post_q})
-            
-            with st.spinner("Nemo is typing..."):
-                if st.session_state.post_q_count == 10:
-                    farewell_msg = "Thanks for the chat! My system asks me to take a break after 10 turns, so see you later and bye for now. It was nice talking to you."
-                    st.session_state.messages.append({"role": "assistant", "content": farewell_msg})
-                    add_to_transcript(f"**Monitor:** {post_q}\n\n**AI:**\n{farewell_msg}\n\n---\n")
-                    st.session_state.app_phase = "finished"
-                else:
-                    conv_prompt = f"The user said: '{post_q}'. Respond naturally. If they asked a question, answer it. If they didn't, ask them 'Do you have any more questions for me?' and ask a thoughtful question of your own about the target."
-                    
-                    # KNOWLEDGE INJECTION: On-the-fly message substitution for Gemma 4
-                    nemo_knowledge = get_nemo_knowledge()
-                    temp_messages = st.session_state.messages.copy()
-                    
-                    # We inject the knowledge from nemo.md at the very beginning (as a core system prompt for Gemma)
-                    temp_messages.insert(0, {"role": "system", "content": f"=== KNOWLEDGE INJECTION ===\n{nemo_knowledge}\n==========================="})
-                    temp_messages[-1] = {"role": "user", "content": conv_prompt}
-                    
-                    # Using the MODEL_CHAT (Gemma)
-                    reply = call_openrouter(st.session_state.api_key, temp_messages, model=MODEL_CHAT)
-                    st.session_state.messages.append({"role": "assistant", "content": reply})
-                    add_to_transcript(f"**Monitor:** {post_q}\n\n**AI:**\n{reply}\n\n---\n")
-            st.rerun()
-
-    st.divider()
-    col1, col2 = st.columns(2)
-    with col1:
-        if st.button("🛑 End Session", use_container_width=True, type="primary"):
-            farewell_msg = "Thanks for the chat! My system asks me to take a break after 10 turns, so see you later and bye for now. It was nice talking to you."
-            add_to_transcript(f"\n\n**AI:**\n{farewell_msg}\n\n---\n")
-            st.session_state.app_phase = "finished"
-            st.rerun()
-    with col2:
-        st.download_button(
-            label="💾 Save Session (.txt)",
-            data=st.session_state.transcript,
-            file_name=f"RV_Lite_{st.session_state.target_id}.txt",
-            mime="text/plain",
-            use_container_width=True
-        )
-
-# --- ENDING ---
-if st.session_state.app_phase == "finished":
-    st.success("Session permanently ended. You can download the transcript.")
-    
-    st.download_button(
-        label="📥 Save Session (.txt)",
-        data=st.session_state.transcript,
-        file_name=f"RV_Lite_{st.session_state.target_id}.txt",
-        mime="text/plain",
-        use_container_width=True
-    )
-    
-    if st.button("🔄 Reset and start a new target", use_container_width=True):
-        st.session_state.app_phase = "setup"
-        st.session_state.transcript = ""
-        st.session_state.messages = []
-        st.session_state.target_id = generate_target_id()
-        st.session_state.blind_q_count = 0
-        st.session_state.post_q_count = 0
-        st.session_state.real_target = ""
-        st.rerun()
+    step3_prompt = "Phase 3: Deep Exploration.\n- Move on to the main aspect of the target and describe.\n- Describe the immediate surroundings, as well as the near and distant environment.\n- Move to the target centre and describe.\n- Go to the main activity/event and describe.\nKeep providing raw data without naming the target. (Remember to maintain a multi-altitude orbital scan while gathering data)."
+    st.session_state.messages.
