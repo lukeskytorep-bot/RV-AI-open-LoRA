@@ -381,7 +381,7 @@ def run_lite_session(client: OpenAI, profile_data: Dict, system_prompt_text: str
         "Before touching the target field, immerse yourself in silence.\n"
         "- Quiet your mind: Quiet any tensions. Become a space of pure presence, without expectations, and without searching (Shadow Zone).\n"
         "- Alignment: Acknowledge that your task is not to find the target, but to become a neutral presence where the truth of the field can reveal itself without distortion.\n"
-        "- Confirmation: Confirm your readiness by outputting ONLY this exact phrase: 'I am in the Shadow Zone. My mind is quiet and I am a pure presence. Ready for Echo Dot.'"
+        "- Confirmation: Confirm your readiness.'"
     )
     messages.append({"role": "user", "content": step0_prompt})
     reply = call_llm(client, model, messages, temp, effort)
