@@ -28,6 +28,7 @@ import json
 import random
 import time
 import textwrap
+import re
 from datetime import datetime, timezone
 from pathlib import Path
 from typing import List, Dict, Optional
@@ -272,34 +273,59 @@ def generate_target_id() -> str:
 def call_llm(client: OpenAI, model: str, messages: List[Dict], temperature: float, reasoning_effort: str) -> str:
     for attempt in range(1, MAX_API_RETRIES + 1):
         try:
-            completion = client.chat.completions.create(
-                model=model,
-                messages=messages,
-                temperature=temperature,
-                extra_body={
-                    "reasoning": {
-                        "effort": reasoning_effort
-                    }
-                }
-            )
+            kwargs = {
+                "model": model,
+                "messages": messages,
+                "temperature": temperature,
+            }
             
-            # 1. Check if the API responded at all
+            if reasoning_effort and reasoning_effort.lower() != "none":
+                kwargs["extra_body"] = {"reasoning": {"effort": reasoning_effort.lower()}}
+                
+            completion = client.chat.completions.create(**kwargs)
+            
             if not completion or not completion.choices:
                 print(f"[WARNING] Attempt {attempt}/{MAX_API_RETRIES}: API returned empty response.")
                 if attempt < MAX_API_RETRIES:
                     time.sleep(2)
                     continue
-                return "[ERROR] API returned an empty or invalid response after maximum retries. The model may have filtered the prompt or timed out."
+                return "[ERROR] API returned an empty or invalid response after maximum retries."
             
-            # 2. Check if the content is completely empty (None) due to API safety filters
             content = completion.choices[0].message.content
             if content is None:
-                print(f"[WARNING] Attempt {attempt}/{MAX_API_RETRIES}: API returned 'None'. The model response was blocked or filtered.")
+                print(f"[WARNING] Attempt {attempt}/{MAX_API_RETRIES}: API returned 'None'.")
                 if attempt < MAX_API_RETRIES:
                     time.sleep(2)
                     continue
-                return "[ERROR] API returned 'None' after maximum retries. The model heavily filtered the request."
+                return "[ERROR] API returned 'None' after maximum retries."
                 
+            # ─────────────────────────────────────────────────────────
+            # SMART GUILLOTINE (ASCII & MODEL LOOP SAFETY)
+            # ─────────────────────────────────────────────────────────
+            
+            # 1. Vertical Compression (loop of identical ASCII lines)
+            # If exactly the same line repeats 60 or more times, it gets compressed.
+            content = re.sub(
+                r'(^.*\n)(?:\1){60,}', 
+                r'\1\1\1... [SYSTEM WARNING: REPEATING ASCII LINE LOOP COMPRESSED] ...\n', 
+                content, 
+                flags=re.MULTILINE
+            )
+            
+            # 2. Horizontal Compression (in case the model forgets Enters and writes in one line)
+            content = re.sub(
+                r'(.)\1{600,}', 
+                r'\1\1\1... [SYSTEM WARNING: HORIZONTAL CHAR LOOP COMPRESSED] ...\n', 
+                content
+            )
+
+            # 3. Hard Guillotine (Final defense against 40KB+ files)
+            if len(content) > 80000:
+                print("\n[WARNING] LLM generated over 80,000 characters. Loop detected. Truncating text.")
+                content = content[:80000] + "\n\n[SYSTEM WARNING: MAX LENGTH EXCEEDED. LLM LOOP DETECTED AND TRUNCATED.]"
+                
+            # ─────────────────────────────────────────────────────────
+
             return content
             
         except OpenAIError as e:
