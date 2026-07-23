@@ -261,9 +261,9 @@ def call_llm(client: OpenAI, model: str, messages: List[Dict], temperature: floa
             # ─────────────────────────────────────────────────────────
             
             # 1. Vertical Compression (loop of identical ASCII lines)
-            # If exactly the same line repeats 20 or more times, it gets compressed.
+            # If exactly the same line repeats 60 or more times, it gets compressed.
             content = re.sub(
-                r'(^.*\n)(?:\1){20,}', 
+                r'(^.*\n)(?:\1){60,}', 
                 r'\1\1\1... [SYSTEM WARNING: REPEATING ASCII LINE LOOP COMPRESSED] ...\n', 
                 content, 
                 flags=re.MULTILINE
@@ -271,15 +271,15 @@ def call_llm(client: OpenAI, model: str, messages: List[Dict], temperature: floa
             
             # 2. Horizontal Compression (in case the model forgets Enters and writes in one line)
             content = re.sub(
-                r'(.)\1{200,}', 
+                r'(.)\1{600,}', 
                 r'\1\1\1... [SYSTEM WARNING: HORIZONTAL CHAR LOOP COMPRESSED] ...\n', 
                 content
             )
 
             # 3. Hard Guillotine (Final defense against 40KB+ files)
-            if len(content) > 12000:
-                print("\n[WARNING] LLM generated over 12,000 characters. Loop detected. Truncating text.")
-                content = content[:12000] + "\n\n[SYSTEM WARNING: MAX LENGTH EXCEEDED. LLM LOOP DETECTED AND TRUNCATED.]"
+            if len(content) > 80000:
+                print("\n[WARNING] LLM generated over 80,000 characters. Loop detected. Truncating text.")
+                content = content[:80000] + "\n\n[SYSTEM WARNING: MAX LENGTH EXCEEDED. LLM LOOP DETECTED AND TRUNCATED.]"
                 
             # ─────────────────────────────────────────────────────────
 
