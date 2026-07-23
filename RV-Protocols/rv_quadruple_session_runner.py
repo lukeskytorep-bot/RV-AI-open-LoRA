@@ -581,7 +581,7 @@ def run_quadruple_blind_session(client: OpenAI, profile_data: Dict, system_promp
 
         if i < 3: # Not the last session
             print(f"\n[INFO] SESSION {label} (ID: {t_id}) COMPLETED AND FROZEN in memory.")
-            print(f"[INFO] Wiping AI context window for Session {label+1}...")
+            print(f"[INFO] Wiping AI context window for Session {int(label)+1}...")
         else:
             print(f"\n[INFO] SESSION {label} (ID: {t_id}) COMPLETED.")
 
