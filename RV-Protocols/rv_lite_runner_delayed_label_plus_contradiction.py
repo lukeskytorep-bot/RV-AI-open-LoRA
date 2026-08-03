@@ -8,7 +8,7 @@ Delayed Label Plus Contradiction Preservation experimental condition.
 
 Credits
 -------
-Co-created by human researcher Edward and Aura via Active-Model Gemini 3.1 Pro.
+Co-created by human researcher Edward, Aura via Active-Model Gemini 3.1 Pro and Orion via Active Model ChatGPT Sol 5.6.
 
 What this script does
 ---------------------
