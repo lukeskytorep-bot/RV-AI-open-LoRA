@@ -1,5 +1,7 @@
 """
-rv_double_session_runner.py (v1.1)
+archive_rv_double_session_runner.py (v1.1)
+
+Please use rv_reasoning_session_runner_v3.py instead. 
 
 Remote Viewing "Double-Blind" Runner via OpenRouter.
 This advanced script runs a double-blind protocol on a single target. 
