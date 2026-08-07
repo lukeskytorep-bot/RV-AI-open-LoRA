@@ -1,4 +1,4 @@
-""
+"""
 rv_repeat_session_blind_runner.py (v1.0, August 2026)
 
 Blind repeated-session study runner for AI Remote Viewing via OpenRouter.
@@ -680,7 +680,7 @@ def run_target_pair(
 
 
 def write_blind_transcripts(mapping_rows: List[Dict]):
-    """Write the whole completed batch in an order unrelated to execution."""
+    # Write the whole completed batch in an order unrelated to execution.
     output_dir = Path(TRANSCRIPTS_DIR)
     output_dir.mkdir(exist_ok=True)
     pending = []
